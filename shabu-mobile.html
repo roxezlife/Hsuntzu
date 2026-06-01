@@ -1,0 +1,1003 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Hsuntzu Cost Cal</title>
+<link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#000000;--surface:#050e1a;--card:#081828;--card2:#0d2038;
+  --border:#122a44;--border2:#1a3a5c;
+  --accent:#0ea5e9;--adim:rgba(14,165,233,.15);
+  --red:#f87171;--rdim:rgba(248,113,113,.1);
+  --green:#34d399;--gdim:rgba(52,211,153,.1);
+  --blue:#38bdf8;--bdim:rgba(56,189,248,.1);
+  --text:#e0f0ff;--text2:#3a6080;--text3:#1a3250;
+  --r:12px;--nav-h:60px;--top-h:50px;
+}
+body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);height:100dvh;display:flex;flex-direction:column;overflow:hidden}
+button{cursor:pointer;font-family:'Sarabun',sans-serif;border:none;outline:none;user-select:none}
+input,select,textarea{font-family:'Sarabun',sans-serif;outline:none;-webkit-appearance:none}
+::-webkit-scrollbar{display:none}
+
+/* TOP BAR */
+.topbar{height:var(--top-h);background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:8px;flex-shrink:0}
+.brand{font-family:'Chakra Petch',sans-serif;font-size:16px;font-weight:700;color:var(--accent);flex:1}
+.clock{font-family:'Chakra Petch',sans-serif;font-size:12px;color:var(--text3)}
+
+/* CONTENT */
+.content{flex:1;overflow:hidden;position:relative}
+.tab-pane{position:absolute;inset:0;overflow-y:auto;display:none;flex-direction:column}
+.tab-pane.active{display:flex}
+
+/* BOTTOM NAV */
+.bottomnav{height:calc(var(--nav-h) + env(safe-area-inset-bottom));padding-bottom:env(safe-area-inset-bottom);background:var(--surface);border-top:1px solid var(--border);display:flex;flex-shrink:0}
+.navbtn{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;color:var(--text3);font-size:10px;font-weight:600;transition:color .15s;position:relative;padding-top:4px}
+.navbtn.active{color:var(--accent)}
+.ni{font-size:22px;line-height:1}
+.badge{position:absolute;top:5px;right:calc(50% - 22px);background:var(--accent);color:#000;font-size:9px;font-weight:700;font-family:'Chakra Petch',sans-serif;border-radius:10px;padding:1px 5px;min-width:16px;text-align:center;display:none}
+.badge.show{display:block}
+
+/* CHIPS */
+.chips-wrap{overflow-x:auto;display:flex;gap:6px;padding:8px 14px;flex-shrink:0}
+.chip{padding:7px 14px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap;background:var(--card);border:1px solid var(--border);color:var(--text2);flex-shrink:0;transition:all .15s}
+.chip.active{background:var(--accent);border-color:var(--accent);color:#000}
+
+/* SEARCH */
+.search-wrap{padding:10px 14px 0;flex-shrink:0;position:relative}
+.search-wrap input{width:100%;background:var(--card);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-size:14px;padding:10px 12px 10px 36px}
+.search-wrap input:focus{border-color:var(--accent)}
+.s-icon{position:absolute;left:26px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none}
+
+/* SECTION HDR */
+.sec-hdr{display:flex;align-items:center;gap:8px;padding:12px 14px 4px}
+.sec-line{flex:1;height:1px;background:var(--border)}
+.sec-lbl{font-family:'Chakra Petch',sans-serif;font-size:9px;font-weight:700;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;white-space:nowrap}
+
+/* ── TAB 1: เมนู ── */
+.item-list{padding:8px 14px 90px;display:flex;flex-direction:column;gap:7px}
+.mcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:12px;transition:border-color .15s;active:border-color:var(--accent)}
+.mcard:active{border-color:var(--accent);background:rgba(232,149,42,.04)}
+.mc-emoji{font-size:22px;width:28px;text-align:center;flex-shrink:0}
+.mc-info{flex:1;min-width:0}
+.mc-name{font-size:14px;font-weight:600;color:var(--text)}
+.mc-cat{font-size:11px;color:var(--text3);margin-top:2px}
+.mc-right{text-align:right;flex-shrink:0}
+.mc-price{font-family:'Chakra Petch',sans-serif;font-size:17px;font-weight:700;color:var(--accent)}
+.mc-mg{font-size:11px;margin-top:2px;font-family:'Chakra Petch',sans-serif}
+.mc-mg.pos{color:var(--green)}.mc-mg.neg{color:var(--red)}
+.mc-chevron{font-size:14px;color:var(--text3);flex-shrink:0}
+
+/* FAB */
+.fab{position:fixed;bottom:calc(var(--nav-h) + 16px + env(safe-area-inset-bottom));right:16px;width:54px;height:54px;background:var(--accent);border-radius:50%;font-size:28px;color:#000;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(232,149,42,.45);z-index:40;transition:transform .15s}
+.fab:active{transform:scale(.9)}
+
+/* ── TAB 2: คำนวณ ── */
+.calc-scroll{flex:1;min-height:0;overflow-y:auto;padding-bottom:8px}
+.calc-item{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:11px 14px;display:flex;align-items:center;gap:10px;margin:0 14px 6px;transition:border-color .15s}
+.calc-item.hi{border-color:var(--accent);background:rgba(232,149,42,.04)}
+.ci-em{font-size:20px;width:26px;text-align:center;flex-shrink:0}
+.ci-info{flex:1;min-width:0}
+.ci-name{font-size:13px;font-weight:600;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ci-cost{font-size:11px;color:var(--text3);margin-top:1px;font-family:'Chakra Petch',sans-serif}
+.qc{display:flex;align-items:center;gap:5px;flex-shrink:0}
+.qb{width:34px;height:34px;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .15s}
+.qb:active{background:var(--accent);border-color:var(--accent);color:#000}
+.qb.dim{opacity:.3}
+.qn{font-family:'Chakra Petch',sans-serif;font-size:15px;font-weight:700;width:22px;text-align:center}
+.qn.hi{color:var(--accent)}
+.calc-footer{background:var(--surface);border-top:1px solid var(--border);padding:12px 16px 14px;flex-shrink:0}
+.cf-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.cf-lbl{font-size:13px;color:var(--text2)}
+.cf-val{font-family:'Chakra Petch',sans-serif;font-size:14px;font-weight:700}
+.cf-price-row{display:flex;align-items:center;gap:10px;margin:8px 0}
+.cf-price-lbl{font-size:13px;color:var(--text2);flex:1}
+.cf-price-inp{background:var(--card);border:1px solid var(--accent);border-radius:8px;color:var(--accent);font-family:'Chakra Petch',sans-serif;font-size:18px;font-weight:700;padding:7px 10px;width:110px;text-align:right}
+.cf-prf-row{display:flex;justify-content:space-between;align-items:baseline;padding:4px 0}
+.cf-prf-lbl{font-size:14px;font-weight:700}
+.cf-prf-val{font-family:'Chakra Petch',sans-serif;font-size:20px;font-weight:700}
+.cf-clear{width:100%;padding:10px;background:transparent;border:1px solid var(--border2);color:var(--text3);border-radius:8px;font-size:13px;font-weight:600;margin-top:8px}
+.cf-clear:active{border-color:var(--red);color:var(--red)}
+
+/* ── TAB 3: สูตร ── */
+.rcp-list-wrap{padding:8px 14px 90px;display:flex;flex-direction:column;gap:8px}
+.rcp-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:flex;align-items:center;gap:12px;transition:border-color .15s}
+.rcp-card:active{border-color:var(--accent)}
+.rcp-em{font-size:22px;width:28px;text-align:center;flex-shrink:0}
+.rcp-info{flex:1;min-width:0}
+.rcp-name{font-size:14px;font-weight:600;color:var(--text)}
+.rcp-stats{font-size:11px;color:var(--text3);margin-top:3px;font-family:'Chakra Petch',sans-serif}
+.rcp-badge{background:var(--gdim);border:1px solid rgba(77,184,106,.3);color:var(--green);font-size:10px;font-weight:700;border-radius:5px;padding:2px 7px;flex-shrink:0}
+.add-rcp-btn{margin:0 14px 14px;padding:12px;background:var(--card2);border:1px dashed var(--border2);border-radius:var(--r);color:var(--text3);font-size:13px;font-weight:600;text-align:center;transition:all .15s}
+.add-rcp-btn:active{border-color:var(--accent);color:var(--accent)}
+
+/* Recipe Detail (sub-view) */
+.rcp-detail{position:absolute;inset:0;background:var(--bg);display:none;overflow-y:auto;z-index:5}
+.rcp-detail.open{display:block}
+.rcp-detail-topbar{position:sticky;top:0;z-index:2;background:var(--surface);border-bottom:1px solid var(--border);padding:0 14px;height:var(--top-h);display:flex;align-items:center;gap:10px}
+.back-btn{padding:6px 12px;background:var(--card);border:1px solid var(--border);border-radius:8px;font-size:13px;font-weight:600;color:var(--text2)}
+.rcp-detail-title{font-family:'Chakra Petch',sans-serif;font-size:14px;font-weight:700;color:var(--accent);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sync-btn{padding:7px 12px;background:var(--green);color:#000;border-radius:8px;font-size:12px;font-weight:700;flex-shrink:0}
+.rcp-detail-scroll{padding:12px 14px 32px;display:flex;flex-direction:column;gap:10px}
+.rcp-hdr-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:14px}
+.rcp-hdr-row{display:flex;gap:10px;align-items:center;margin-bottom:10px}
+.rcp-em-inp{width:46px;height:46px;background:var(--card2);border:1px solid var(--border2);border-radius:9px;font-size:22px;text-align:center;color:var(--text)}
+.rcp-em-inp:focus{border-color:var(--accent)}
+.rcp-nm-inp{flex:1;background:var(--card2);border:1px solid var(--border2);border-radius:9px;color:var(--text);font-size:15px;font-weight:700;padding:10px 12px}
+.rcp-nm-inp:focus{border-color:var(--accent)}
+.yield-row{display:flex;align-items:center;gap:8px}
+.yield-lbl{font-size:12px;color:var(--text2)}
+.yield-inp{flex:1;background:var(--card2);border:1px solid var(--border2);border-radius:8px;color:var(--text);font-family:'Chakra Petch',sans-serif;font-size:15px;font-weight:700;padding:9px 12px;text-align:right}
+.yield-inp:focus{border-color:var(--accent)}
+.del-rcp-btn{padding:8px 14px;background:var(--rdim);border:1px solid rgba(224,80,80,.4);color:var(--red);border-radius:8px;font-size:12px;font-weight:600;flex-shrink:0}
+.sum-strip{background:var(--card2);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sum-item .s-lbl{font-size:10px;color:var(--text3);margin-bottom:2px}
+.sum-item .s-val{font-family:'Chakra Petch',sans-serif;font-size:16px;font-weight:700}
+.s-val.orange{color:var(--accent)}.s-val.green{color:var(--green)}.s-val.blue{color:var(--blue)}
+.link-pill{background:var(--gdim);border:1px solid rgba(77,184,106,.3);border-radius:9px;padding:9px 12px;grid-column:1/-1}
+.link-pill .lp-title{font-size:11px;color:var(--text3);margin-bottom:4px}
+.link-pill .lp-vals{display:flex;gap:12px;align-items:center}
+.link-pill .lp-name{font-size:13px;font-weight:700;color:var(--green)}
+.link-pill .lp-cost{font-family:'Chakra Petch',sans-serif;font-size:14px;font-weight:700;color:var(--accent)}
+.ing-section{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.ing-sec-hdr{background:var(--card2);padding:10px 14px;font-family:'Chakra Petch',sans-serif;font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid var(--border)}
+.ing-card{padding:10px 12px;border-bottom:1px solid var(--border)}
+.ing-card:last-child{border-bottom:none}
+.ing-name-row{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+.ing-nm-inp{flex:1;background:var(--card2);border:1px solid var(--border2);border-radius:7px;color:var(--text);font-size:13px;font-weight:600;padding:7px 10px}
+.ing-nm-inp:focus{border-color:var(--accent)}
+.ing-nm-inp.sub-r{color:var(--blue);font-style:italic}
+.ing-del{width:30px;height:30px;background:var(--rdim);border:1px solid rgba(224,80,80,.3);color:var(--red);border-radius:6px;font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ing-fields{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;align-items:end}
+.ing-field-lbl{font-size:10px;color:var(--text3);margin-bottom:3px}
+.ing-inp{width:100%;background:var(--card2);border:1px solid var(--border2);border-radius:7px;color:var(--text);font-family:'Chakra Petch',sans-serif;font-size:13px;font-weight:600;padding:7px 8px;text-align:right}
+.ing-inp:focus{border-color:var(--accent)}
+.ing-derived{background:var(--bg);border-radius:7px;padding:7px 8px;font-family:'Chakra Petch',sans-serif;font-size:12px;color:var(--text2);text-align:right}
+.ing-cost-row{display:flex;justify-content:flex-end;margin-top:6px;gap:8px;align-items:center}
+.ing-cost-lbl{font-size:11px;color:var(--text3)}
+.ing-cost-val{font-family:'Chakra Petch',sans-serif;font-size:13px;font-weight:700;color:var(--accent)}
+.sub-badge{display:inline-flex;align-items:center;gap:4px;background:var(--bdim);border:1px solid rgba(74,158,255,.3);border-radius:5px;padding:4px 9px;font-size:11px;color:var(--blue);font-weight:600}
+.ing-add-row{padding:10px 12px;display:flex;gap:8px}
+.add-ing-btn{flex:1;padding:9px;background:var(--adim);border:1px solid rgba(232,149,42,.4);border-radius:8px;color:var(--accent);font-size:13px;font-weight:600}
+.add-sub-btn{padding:9px 14px;background:transparent;border:1px dashed rgba(74,158,255,.4);border-radius:8px;color:var(--blue);font-size:12px;font-weight:600}
+
+/* MODAL (bottom sheet) */
+.mover{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);z-index:300;display:flex;align-items:flex-end;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.mover.open{opacity:1;pointer-events:all}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:20px 20px 0 0;width:100%;max-width:520px;padding:10px 20px calc(20px + env(safe-area-inset-bottom));transform:translateY(40px);transition:transform .28s cubic-bezier(.34,1.2,.64,1);max-height:88vh;overflow-y:auto}
+.mover.open .modal{transform:translateY(0)}
+.mhandle{width:36px;height:4px;background:var(--border2);border-radius:2px;margin:0 auto 14px}
+.mtitle{font-family:'Chakra Petch',sans-serif;font-size:16px;font-weight:700;color:var(--text);margin-bottom:14px}
+.mlbl{font-size:12px;color:var(--text2);margin-bottom:4px;display:block;margin-top:10px}
+.mlbl:first-of-type{margin-top:0}
+.minp{width:100%;background:var(--card);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-size:15px;padding:11px 12px}
+.minp:focus{border-color:var(--accent)}
+.msep{font-family:'Chakra Petch',sans-serif;font-size:10px;font-weight:600;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin:14px 0 8px;padding-top:12px;border-top:1px solid var(--border)}
+.mac{font-size:11px;color:var(--accent);min-height:16px;margin:4px 0;font-family:'Chakra Petch',sans-serif}
+.mpv{background:var(--card2);border-radius:9px;padding:9px 12px;margin-top:8px;font-size:13px;color:var(--text2)}
+.mrow{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px}
+.mcancel{padding:12px;background:var(--card);border:1px solid var(--border);color:var(--text);border-radius:11px;font-size:14px;font-weight:600;width:100%}
+.mok{padding:12px;background:var(--accent);border:none;color:#000;border-radius:11px;font-size:14px;font-weight:700;width:100%}
+.mok.red{background:var(--red);color:#fff}
+.mconfirm{font-size:14px;color:var(--text);text-align:center;padding:4px 0 12px;line-height:1.8}
+.mdelbtn{width:100%;padding:11px;background:var(--rdim);border:1px solid rgba(224,80,80,.4);color:var(--red);border-radius:11px;font-size:13px;font-weight:600;margin-top:8px}
+
+/* TOAST */
+.toast{position:fixed;top:16px;left:50%;transform:translateX(-50%) translateY(-10px);background:var(--green);color:#fff;padding:10px 20px;border-radius:20px;font-size:13px;font-weight:600;z-index:999;opacity:0;transition:all .3s;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.err{background:var(--red)}
+.empty{text-align:center;padding:48px 20px;color:var(--text3);font-size:14px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">🍲 <span id="shopLbl">Hsuntzu Cost Cal</span></div>
+  <div class="clock" id="clockEl"></div>
+</div>
+
+<div class="content">
+
+  <!-- ══ TAB 1: เมนู (ดู + จัดการ) ══ -->
+  <div class="tab-pane active" id="tab-menu">
+    <div style="display:flex;gap:8px;padding:10px 14px 0;align-items:center;flex-shrink:0">
+      <div style="position:relative;flex:1">
+        <span class="s-icon" style="position:absolute;top:50%;left:12px;transform:translateY(-50%);pointer-events:none">🔍</span>
+        <input type="text" id="menuSearch" placeholder="ค้นหาเมนู..." oninput="renderMenu()"
+          style="width:100%;background:var(--card);border:1px solid var(--border2);border-radius:10px;color:var(--text);font-size:14px;padding:10px 12px 10px 36px">
+      </div>
+      <button onclick="openCatMgr()" style="width:42px;height:42px;background:var(--card);border:1px solid var(--border2);border-radius:10px;font-size:18px;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:border-color .15s" onmouseenter="this.style.borderColor='var(--accent)'" onmouseleave="this.style.borderColor='var(--border2)'">⚙️</button>
+    </div>
+    <div class="chips-wrap" id="menuChips"></div>
+    <div id="menuList" class="item-list"></div>
+    <button class="fab" id="menuFab" onclick="openAdd()">+</button>
+  </div>
+
+  <!-- ══ TAB 2: คำนวณ ══ -->
+  <div class="tab-pane" id="tab-calc">
+    <div class="chips-wrap" id="calcChips"></div>
+    <div class="calc-scroll" id="calcScroll"></div>
+    <div class="calc-footer">
+      <div class="cf-row">
+        <span class="cf-lbl">ต้นทุนรวม</span>
+        <span class="cf-val" style="color:var(--red)" id="cfCost">0.00</span>
+      </div>
+      <div class="cf-price-row">
+        <span class="cf-price-lbl">💰 ราคาขายชุด</span>
+        <input type="number" inputmode="decimal" class="cf-price-inp" id="cfPrice" placeholder="–" oninput="renderCalcResult()">
+      </div>
+      <div class="cf-prf-row" id="cfPrfRow" style="display:none">
+        <span class="cf-prf-lbl" id="cfPrfLbl">กำไร</span>
+        <span class="cf-prf-val" id="cfPrfVal">–</span>
+      </div>
+      <button class="cf-clear" onclick="clearCalc()">🗑 ล้างชุด</button>
+    </div>
+  </div>
+
+  <!-- ══ TAB 3: สูตรอาหาร ══ -->
+  <div class="tab-pane" id="tab-recipe">
+    <!-- List view -->
+    <div id="rcpListWrap">
+      <div class="rcp-list-wrap" id="rcpList"></div>
+      <button class="add-rcp-btn" onclick="openAddRecipe()">+ เพิ่มสูตรใหม่</button>
+    </div>
+    <!-- Detail view -->
+    <div class="rcp-detail" id="rcpDetail">
+      <div class="rcp-detail-topbar">
+        <button class="back-btn" onclick="closeDetail()">← กลับ</button>
+        <div class="rcp-detail-title" id="rcpDetailTitle"></div>
+        <button class="sync-btn" onclick="syncToMenu()">🔄 อัปเดตเมนู</button>
+      </div>
+      <div class="rcp-detail-scroll" id="rcpDetailScroll"></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="bottomnav">
+  <button class="navbtn active" id="nb-menu" onclick="switchTab('menu')">
+    <span class="ni">🍽</span>เมนู
+  </button>
+  <button class="navbtn" id="nb-calc" onclick="switchTab('calc')">
+    <span class="ni">🧮</span>คำนวณ
+    <span class="badge" id="calcBadge"></span>
+  </button>
+  <button class="navbtn" id="nb-recipe" onclick="switchTab('recipe')">
+    <span class="ni">🌶</span>สูตร
+  </button>
+</div>
+
+<div class="mover" id="modal" onclick="tryClose(event)">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mtitle" id="mTitle"></div>
+    <div id="mBody"></div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ═══ CONSTANTS ═══════════════════════════════════════════════════════════════
+const SK='shabu_pos_v27';
+const CAT_EMOJI={ทั้งหมด:'🍽',หมู:'🥓',เนื้อ:'🥩',วัตถุดิบเสริม:'🦐',ผัก:'🥦',เส้น:'🍜',น้ำจิ้ม:'🥣',น้ำซุป:'🍲',แพ็คเกจ:'📦'};
+const DEFAULT_CATS=['หมู','เนื้อ','วัตถุดิบเสริม','ผัก','เส้น','น้ำจิ้ม','น้ำซุป','แพ็คเกจ'];
+const DEFAULT_ALC=[
+  {id:'p1', cat:'หมู',     emoji:'🥓',name:'หมูหมักนุ่ม',              price:20, cost:31.35, pricePerKg:150, qty:209},
+  {id:'p2', cat:'หมู',     emoji:'🥓',name:'หมูสามชั้นสไลด์',          price:22, cost:9.1,   pricePerKg:130, qty:70},
+  {id:'p3', cat:'หมู',     emoji:'🥓',name:'หมูสันคอสไลด์',            price:22, cost:9.8,   pricePerKg:140, qty:70},
+  {id:'p4', cat:'หมู',     emoji:'🥓',name:'หมูสันนอกสไลด์',           price:17, cost:8.4,   pricePerKg:120, qty:70},
+  {id:'p5', cat:'เนื้อ',   emoji:'🥩',name:'เนื้อหมักนุ่ม',             price:16, cost:15.4,  pricePerKg:220, qty:70},
+  {id:'p6', cat:'เนื้อ',   emoji:'🥩',name:'เนื้อเสือร้องไห้สไลด์',    price:21, cost:19.6,  pricePerKg:280, qty:70},
+  {id:'p7', cat:'เนื้อ',   emoji:'🥩',name:'เนื้อสันคอสไลด์',          price:21, cost:18.2,  pricePerKg:260, qty:70},
+  {id:'p8', cat:'เนื้อ',   emoji:'🥩',name:'เนื้อสันนอกสไลด์',         price:21, cost:21,    pricePerKg:300, qty:70},
+  {id:'p9', cat:'วัตถุดิบเสริม',emoji:'🐟',name:'ปลาดอลลี่',           price:7,  cost:5.25,  pricePerKg:75,  qty:70},
+  {id:'p10',cat:'วัตถุดิบเสริม',emoji:'🪼',name:'แมงกะพรุน',           price:16, cost:10.5,  pricePerKg:150, qty:70},
+  {id:'p11',cat:'วัตถุดิบเสริม',emoji:'🦑',name:'ปลาหมึกกรอบ',         price:16, cost:14,    pricePerKg:200, qty:70},
+  {id:'p13',cat:'วัตถุดิบเสริม',emoji:'🟤',name:'ลูกชิ้นหมู',          price:10, cost:12,    pricePerKg:80,  qty:150},
+  {id:'p14',cat:'วัตถุดิบเสริม',emoji:'🔴',name:'ลูกชิ้นเนื้อ',        price:18, cost:8},
+  {id:'p16',cat:'วัตถุดิบเสริม',emoji:'🧡',name:'เต้าฮู้ชีส',          price:16, cost:8},
+  {id:'p17',cat:'วัตถุดิบเสริม',emoji:'⚪',name:'ลูกชิ้นเต้าหู้',      price:12, cost:8},
+  {id:'p_fthm',cat:'วัตถุดิบเสริม',emoji:'🌀',name:'ฟองเต้าฮู้ม้วน',   price:0,  cost:0},
+  {id:'p18', cat:'ผัก',    emoji:'🥬',name:'ผักกาดขาว',                 price:3,  cost:1.2,   pricePerKg:30,  qty:40},
+  {id:'p19', cat:'ผัก',    emoji:'🌿',name:'ผักบุ้ง',                   price:3,  cost:1.05,  pricePerKg:35,  qty:30},
+  {id:'p20', cat:'ผัก',    emoji:'🥦',name:'กะหล่ำปลี',                 price:2,  cost:0.8,   pricePerKg:20,  qty:40},
+  {id:'p21', cat:'ผัก',    emoji:'🍄',name:'เห็ดเข็มทอง',               price:3,  cost:2,     pricePerKg:50,  qty:40},
+  {id:'p22', cat:'ผัก',    emoji:'🍄',name:'เห็ดออรินจิ',               price:3,  cost:2.8,   pricePerKg:80,  qty:35},
+  {id:'p23', cat:'ผัก',    emoji:'🍄',name:'เห็ดหลินขาว',               price:5,  cost:2.45,  pricePerKg:70,  qty:35},
+  {id:'p24', cat:'ผัก',    emoji:'🌽',name:'ข้าวโพดอ่อน',               price:5,  cost:2.275, pricePerKg:65,  qty:35},
+  {id:'p25', cat:'ผัก',    emoji:'🌊',name:'สาหร่ายวากาเมะ',            price:39, cost:1.8,   pricePerKg:600, qty:3},
+  {id:'p25b',cat:'ผัก',    emoji:'🍄',name:'เห็ดหูหนู',                 price:7,  cost:2.8,   pricePerKg:80,  qty:35},
+  {id:'it1780327291720',cat:'ผัก',emoji:'🍽',name:'กระเจี๊ยบ',          price:0,  cost:0},
+  {id:'p_tfy',cat:'ผัก',          emoji:'🥚',name:'เต้าหู้ไข่',          price:0,  cost:0},
+  {id:'p_corn2',cat:'ผัก',        emoji:'🌽',name:'ข้าวโพดหวาน',          price:0,  cost:0},
+  {id:'p27', cat:'เส้น',   emoji:'🍜',name:'หมี่หยก',                   price:5,  cost:3.2,   pricePerKg:40,  qty:80},
+  {id:'p28', cat:'เส้น',   emoji:'🍜',name:'วุ้นเส้น',                  price:11, cost:5.4,   pricePerKg:90,  qty:60},
+  {id:'p29', cat:'เส้น',   emoji:'🍜',name:'เส้นแก้ว',                  price:12, cost:7.2,   pricePerKg:120, qty:60},
+  {id:'p30', cat:'เส้น',   emoji:'🍜',name:'เส้นมันเทศ',                price:18, cost:9,     pricePerKg:150, qty:60},
+  {id:'p31', cat:'เส้น',   emoji:'🍜',name:'เส้นมันเทศใหญ่',            price:4,  cost:27,    pricePerKg:180, qty:150},
+  {id:'p32', cat:'น้ำจิ้ม',emoji:'🥣',name:'น้ำจิ้มหมาล่า',             price:8,  cost:8.8,   pricePerKg:176, qty:50},
+  {id:'p33', cat:'น้ำจิ้ม',emoji:'🥣',name:'น้ำจิ้มงาขาว',              price:5,  cost:9,     pricePerKg:180, qty:50},
+  {id:'p34', cat:'น้ำจิ้ม',emoji:'🥣',name:'น้ำจิ้มสุกี้',              price:4,  cost:9,     pricePerKg:180, qty:50},
+  {id:'p35', cat:'น้ำซุป', emoji:'🍲',name:'ซุปหมาล่า',                 price:50, cost:11,    pricePerKg:150, qty:0},
+  {id:'p36', cat:'น้ำซุป', emoji:'🍲',name:'ซุปน้ำดำ',                  price:60, cost:12.32},
+  {id:'p37', cat:'น้ำซุป', emoji:'🍲',name:'ซุปหมาล่าน้ำข้น',          price:65, cost:30},
+  {id:'pk_a1',cat:'แพ็คเกจ',emoji:'🥡',name:'ถ้วยพลาสติก',             price:4,  cost:2.17},
+  {id:'pk_a2',cat:'แพ็คเกจ',emoji:'🥣',name:'ถ้วยน้ำจิ้ม',             price:2,  cost:0.54},
+  {id:'pk_a3',cat:'แพ็คเกจ',emoji:'🥢',name:'ตะเกียบ',                 price:1,  cost:0.27},
+  {id:'pk_a4',cat:'แพ็คเกจ',emoji:'🍴',name:'ช้อนซ้อม',                price:3,  cost:1.4},
+  {id:'pk_a5',cat:'แพ็คเกจ',emoji:'🛍️',name:'ถุงใส่อาหาร',           price:9,  cost:6},
+  {id:'pk_a6',cat:'แพ็คเกจ',emoji:'🛍️',name:'ถุงแกงขุ่น',            price:1,  cost:0.05},
+  {id:'pk_a7',cat:'แพ็คเกจ',emoji:'⭕',name:'ยาง',                     price:1,  cost:0.01},
+];
+const DEFAULT_RECIPES=[
+  {id:'rcp_mala_paste',name:'พริกแกงหม่าล่า',emoji:'🌶️',yieldGrams:1100,ings:[
+    {n:'น้ำมันพืช',p:245,pq:5000,uq:700},{n:'พริกแห้ง',p:989,pq:9000,uq:200},
+    {n:'หอมแดง',p:85,pq:500,uq:30},{n:'ขิง',p:69,pq:900,uq:30},
+    {n:'ต้นหอม',p:95,pq:1000,uq:20},{n:'ผักชี',p:99,pq:1000,uq:20},
+    {n:'เหล้าจีน',p:212,pq:640,uq:60},{n:'ซอสเสฉวน (Dou Ban Jiang)',p:36,pq:500,uq:25},
+    {n:'พริกไทยเสฉวน',p:238,pq:1000,uq:5},{n:'เม็ดหม่าล่า (ฮวาเจียว)',p:396,pq:1000,uq:5},
+    {n:'อบเชย',p:216,pq:1000,uq:5},{n:'ใบกระวาน',p:120,pq:800,uq:5},
+    {n:'โป๊ยกัก',p:180,pq:1000,uq:5},{n:'ลูกกระวานสีขาว',p:449,pq:1000,uq:5},
+    {n:'เมล็ดยี่หร่า',p:218,pq:1000,uq:5},{n:'เกร็ดน้ำตาล',p:398,pq:8000,uq:5},
+    {n:'เกลือ',p:50,pq:5000,uq:5},{n:'ผงไก่',p:165,pq:1500,uq:5},{n:'ผงชูรส',p:328,pq:3000,uq:5},
+  ]},
+  {id:'rcp_soup_mala',name:'เบสซุปหม่าล่า',emoji:'🍲',yieldGrams:270,menuLink:{id:'p35',qty:100},ings:[
+    {n:'น้ำ',p:0,pq:1,uq:100},{n:'น้ำตาลกรวด',p:120,pq:2000,uq:10},
+    {n:'เกลือ',p:49,pq:5000,uq:20},{n:'ซีอิ้วขาว',p:244,pq:4500,uq:30},
+    {n:'พริกแกงหม่าล่า',p:0,pq:0,uq:140,sub:'rcp_mala_paste'},
+    {n:'ผงปรุงรส รสหมู/ไก่',p:165,pq:1500,uq:20},{n:'น้ำพริกเผา',p:115,pq:900,uq:10},
+  ]},
+  {id:'rcp_soup_mala_thick',name:'เบสซุปหม่าล่าน้ำข้น',emoji:'🍲',yieldGrams:400,menuLink:{id:'p37',qty:130},ings:[
+    {n:'ซอสเสฉวน',p:68,pq:500,uq:30},
+    {n:'พริกแกงหม่าล่า',p:0,pq:0,uq:140,sub:'rcp_mala_paste'},
+    {n:'นม',p:54,pq:1000,uq:200},{n:'ซีอิ้วขาว',p:244,pq:4500,uq:30},
+    {n:'เกลือ',p:49,pq:5000,uq:10},{n:'ผงปรุงรสหมู',p:165,pq:1500,uq:10},
+  ]},
+];
+
+// ═══ DB ══════════════════════════════════════════════════════════════════════
+function loadDB(){try{const r=localStorage.getItem(SK);if(r)return JSON.parse(r);}catch(e){}return null;}
+function saveDB(){try{localStorage.setItem(SK,JSON.stringify(DB));}catch(e){}}
+let DB=loadDB()||{shop:{name:'Hsuntzu Cost Cal'},alc:JSON.parse(JSON.stringify(DEFAULT_ALC)),cart:[],orders:[],customCats:[],deletedDefaultCats:[]};
+if(!DB.alc||!DB.alc.length) DB.alc=JSON.parse(JSON.stringify(DEFAULT_ALC));
+if(!DB.deletedDefaultCats) DB.deletedDefaultCats=[];
+if(!DB.customCats) DB.customCats=[];
+if(!DB.recipes){DB.recipes=JSON.parse(JSON.stringify(DEFAULT_RECIPES));saveDB();}
+const RM=['rcp_base_sesame','rcp_sauce_sesame','rcp_sauce_mala','rcp_soup_namdham'];
+if(DB.recipes.some(r=>RM.includes(r.id))){DB.recipes=DB.recipes.filter(r=>!RM.includes(r.id));saveDB();}
+
+// MIGRATE
+(function migrate(){
+  if(DB.shop?.name==='ร้านชาบูนุ่มนิ่ม'){DB.shop.name='Hsuntzu Cost Cal';saveDB();}
+  document.getElementById('shopLbl').textContent=DB.shop?.name||'Hsuntzu Cost Cal';
+  let changed=false;
+  DB.alc.forEach(it=>{
+    if(it.cat==='ทะเล'||it.cat==='ลูกชิ้น'){it.cat='วัตถุดิบเสริม';changed=true;}
+    if(it.id==='p3'&&it.price===10000){it.price=22;changed=true;}
+    if(it.id==='p31'&&it.name==='เส้นใหญ่'){it.name='เส้นมันเทศใหญ่';changed=true;}
+  });
+  DB.alc=DB.alc.filter(x=>x.id!=='p12'&&x.id!=='p15'&&x.id!=='p_fth');
+  if(!DB.alc.find(x=>x.id==='p_fthm')){DB.alc.push({id:'p_fthm',cat:'วัตถุดิบเสริม',emoji:'🌀',name:'ฟองเต้าฮู้ม้วน',price:0,cost:0});changed=true;}
+  if(!DB.alc.find(x=>x.id==='p_tfy')){DB.alc.push({id:'p_tfy',cat:'ผัก',emoji:'🥚',name:'เต้าหู้ไข่',price:0,cost:0});changed=true;}
+  if(!DB.alc.find(x=>x.id==='p_corn2')){DB.alc.push({id:'p_corn2',cat:'ผัก',emoji:'🌽',name:'ข้าวโพดหวาน',price:0,cost:0});changed=true;}
+  ['ทะเล','ลูกชิ้น'].forEach(c=>{if(!DB.deletedDefaultCats.includes(c))DB.deletedDefaultCats.push(c);});
+  if(changed) saveDB();
+})();
+
+// ═══ HELPERS ═════════════════════════════════════════════════════════════════
+let curTab='menu', menuCat='ทั้งหมด', calcCat='ทั้งหมด';
+const setQty={};
+let _mManual=false, _saveTimer=null, selRecipeId=null;
+function fmt(n){return(+n||0).toFixed(2);}
+function fmtG(n){const v=+n||0;return v%1===0?v.toString():v.toFixed(2);}
+function calcAuto(pkg,qty){return(pkg&&qty)?((pkg/1000)*qty):null;}
+function getCatList(){
+  const del=DB.deletedDefaultCats||[],custom=DB.customCats||[];
+  return['ทั้งหมด',...DEFAULT_CATS.filter(c=>!del.includes(c)),...custom.filter(c=>!DEFAULT_CATS.includes(c))];
+}
+function getItemCost(it){const a=calcAuto(it.pricePerKg,it.qty);return a!==null?a:it.cost;}
+
+// ═══ TABS ════════════════════════════════════════════════════════════════════
+function switchTab(t){
+  curTab=t;
+  document.querySelectorAll('.tab-pane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.navbtn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');
+  document.getElementById('nb-'+t).classList.add('active');
+  document.getElementById('menuFab').style.display=t==='menu'?'flex':'none';
+  if(t==='menu') renderMenu();
+  else if(t==='calc'){renderCalcChips();renderCalcItems();}
+  else if(t==='recipe') renderRecipeList();
+}
+
+// ═══ TAB 1: เมนู ═════════════════════════════════════════════════════════════
+function renderMenu(){
+  const cats=getCatList();
+  document.getElementById('menuChips').innerHTML=cats.map(c=>
+    `<button class="chip${menuCat===c?' active':''}" onclick="menuCat='${c}';renderMenu()">${CAT_EMOJI[c]||'🍽'} ${c}</button>`
+  ).join('');
+  const q=document.getElementById('menuSearch').value.toLowerCase();
+  let items=DB.alc.filter(x=>{
+    if(menuCat!=='ทั้งหมด'&&x.cat!==menuCat) return false;
+    if(q&&!x.name.toLowerCase().includes(q)&&!x.cat.includes(q)) return false;
+    return true;
+  });
+  const el=document.getElementById('menuList');
+  if(!items.length){el.innerHTML=`<div class="empty">🍽 ไม่พบรายการ</div>`;return;}
+  let html='';
+  if(menuCat==='ทั้งหมด'&&!q){
+    for(const cat of getCatList().filter(c=>c!=='ทั้งหมด')){
+      const ci=items.filter(x=>x.cat===cat);if(!ci.length)continue;
+      html+=`<div class="sec-hdr"><div class="sec-line"></div><div class="sec-lbl">${CAT_EMOJI[cat]||'🍽'} ${cat}</div><div class="sec-line"></div></div>`;
+      html+=ci.map(it=>menuCard(it)).join('');
+    }
+  } else {html=items.map(it=>menuCard(it)).join('');}
+  el.innerHTML=html;
+}
+function menuCard(it){
+  const cost=getItemCost(it);
+  const prf=it.price-cost,mg=it.price>0?Math.round(prf/it.price*100):0,pos=prf>=0;
+  return`<div class="mcard" onclick="openEditModal('${it.id}')">
+    <div class="mc-emoji">${it.emoji}</div>
+    <div class="mc-info">
+      <div class="mc-name">${it.name}</div>
+      <div class="mc-cat">${it.cat} · ต้นทุน ${fmt(cost)}</div>
+    </div>
+    <div class="mc-right">
+      <div class="mc-price">${it.price>0?`${fmt(it.price)}`:'–'}</div>
+      ${it.price>0?`<div class="mc-mg ${pos?'pos':'neg'}">${pos?'+':''}${mg}%</div>`:''}
+    </div>
+    <div class="mc-chevron">›</div>
+  </div>`;
+}
+
+// ═══ ADD / EDIT MODAL ════════════════════════════════════════════════════════
+function openAdd(){
+  _mManual=false;
+  const opts=getCatList().filter(c=>c!=='ทั้งหมด').map(c=>
+    `<option value="${c}" ${c===menuCat&&menuCat!=='ทั้งหมด'?'selected':''}>${CAT_EMOJI[c]||''} ${c}</option>`).join('');
+  openModal('+ เพิ่มรายการใหม่',`
+    <div style="display:grid;grid-template-columns:58px 1fr;gap:10px;align-items:end">
+      <div><label class="mlbl">Emoji</label><input class="minp" id="m_em" value="🍽" style="font-size:20px;text-align:center;padding:9px"></div>
+      <div><label class="mlbl">ชื่อ</label><input class="minp" id="m_nm" placeholder="ชื่อรายการ"></div>
+    </div>
+    <label class="mlbl">หมวดหมู่</label>
+    <select class="minp" id="m_ct" style="color:var(--text)">${opts}</select>
+    <div class="msep">ต้นทุน</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div><label class="mlbl">ราคา/กก</label><input class="minp" id="m_pkg" type="number" inputmode="decimal" placeholder="–" oninput="mAC()"></div>
+      <div><label class="mlbl">ปริมาณ (g)</label><input class="minp" id="m_qty" type="number" inputmode="decimal" placeholder="70" oninput="mAC()"></div>
+    </div>
+    <div class="mac" id="m_ac"></div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div><label class="mlbl">ต้นทุน/ชุด <span id="m_cn" style="color:var(--text3);font-size:10px"></span></label>
+        <input class="minp" id="m_co" type="number" inputmode="decimal" placeholder="0" oninput="_mManual=true;document.getElementById('m_cn').textContent='(กรอกเอง)';mPv()"></div>
+      <div><label class="mlbl">ราคาขาย</label><input class="minp" id="m_pr" type="number" inputmode="decimal" placeholder="0" oninput="mPv()"></div>
+    </div>
+    <div class="mpv" id="m_pv">กรอกราคาเพื่อดูกำไร</div>
+    <div class="mrow">
+      <button class="mcancel" onclick="closeModal()">ยกเลิก</button>
+      <button class="mok" onclick="confAdd()">+ เพิ่ม</button>
+    </div>`);
+  setTimeout(()=>document.getElementById('m_nm')?.focus(),150);
+}
+function openEditModal(id){
+  const it=DB.alc.find(x=>x.id===id);if(!it)return;
+  _mManual=false;
+  const opts=getCatList().filter(c=>c!=='ทั้งหมด').map(c=>
+    `<option value="${c}" ${c===it.cat?'selected':''}>${CAT_EMOJI[c]||''} ${c}</option>`).join('');
+  const cost=getItemCost(it);
+  openModal(`${it.emoji} ${it.name}`,`
+    <div style="display:grid;grid-template-columns:58px 1fr;gap:10px;align-items:end">
+      <div><label class="mlbl">Emoji</label><input class="minp" id="m_em" value="${it.emoji}" style="font-size:20px;text-align:center;padding:9px"></div>
+      <div><label class="mlbl">ชื่อ</label><input class="minp" id="m_nm" value="${it.name}"></div>
+    </div>
+    <label class="mlbl">หมวดหมู่</label>
+    <select class="minp" id="m_ct" style="color:var(--text)">${opts}</select>
+    <div class="msep">ต้นทุน</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div><label class="mlbl">ราคา/กก</label><input class="minp" id="m_pkg" type="number" inputmode="decimal" value="${it.pricePerKg||''}" placeholder="–" oninput="mAC()"></div>
+      <div><label class="mlbl">ปริมาณ (g)</label><input class="minp" id="m_qty" type="number" inputmode="decimal" value="${it.qty||''}" placeholder="70" oninput="mAC()"></div>
+    </div>
+    <div class="mac" id="m_ac">${it.pricePerKg&&it.qty?`= ${it.pricePerKg}/1000×${it.qty} = ${fmt((it.pricePerKg/1000)*it.qty)}`:''}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div><label class="mlbl">ต้นทุน/ชุด <span id="m_cn" style="color:var(--text3);font-size:10px">${it.pricePerKg&&it.qty?'(อัตโนมัติ)':''}</span></label>
+        <input class="minp" id="m_co" type="number" inputmode="decimal" value="${fmt(cost)}" oninput="_mManual=true;document.getElementById('m_cn').textContent='(กรอกเอง)';mPv()"></div>
+      <div><label class="mlbl">ราคาขาย</label><input class="minp" id="m_pr" type="number" inputmode="decimal" value="${fmt(it.price)}" oninput="mPv()"></div>
+    </div>
+    <div class="mpv" id="m_pv"></div>
+    <div class="mrow">
+      <button class="mcancel" onclick="closeModal()">ยกเลิก</button>
+      <button class="mok" onclick="saveEdit('${id}')">บันทึก</button>
+    </div>
+    <button class="mdelbtn" onclick="confirmDel('${id}')">🗑 ลบรายการนี้</button>`);
+  mAC();mPv();
+}
+function mAC(){
+  const pkg=parseFloat(document.getElementById('m_pkg')?.value)||0;
+  const qty=parseFloat(document.getElementById('m_qty')?.value)||0;
+  const ac=document.getElementById('m_ac'),cn=document.getElementById('m_cn');
+  if(pkg&&qty){
+    const c=(pkg/1000)*qty;
+    if(ac)ac.textContent=`= ${pkg}/1000×${qty} = ${fmt(c)}`;
+    if(!_mManual){const ci=document.getElementById('m_co');if(ci)ci.value=fmt(c);if(cn)cn.textContent='(อัตโนมัติ)';}
+  } else if(ac) ac.textContent='';
+  mPv();
+}
+function mPv(){
+  const pr=parseFloat(document.getElementById('m_pr')?.value)||0;
+  const co=parseFloat(document.getElementById('m_co')?.value)||0;
+  const prf=pr-co,mg=pr>0?Math.round(prf/pr*100):0,pos=prf>=0;
+  const el=document.getElementById('m_pv');
+  if(el&&(pr||co)) el.innerHTML=`กำไร: <b style="color:${pos?'var(--green)':'var(--red)'}">${pos?'+':''}${fmt(prf)}</b>&nbsp; Margin: <b style="color:${pos?'var(--green)':'var(--red)'}">${mg}%</b>`;
+  else if(el) el.textContent='กรอกราคาเพื่อดูกำไร';
+}
+function confAdd(){
+  const nm=document.getElementById('m_nm')?.value.trim();
+  if(!nm){showToast('กรอกชื่อก่อน',true);return;}
+  const em=document.getElementById('m_em')?.value.trim()||'🍽';
+  const cat=document.getElementById('m_ct')?.value;
+  const price=parseFloat(document.getElementById('m_pr')?.value)||0;
+  const cost=parseFloat(document.getElementById('m_co')?.value)||0;
+  const pricePerKg=parseFloat(document.getElementById('m_pkg')?.value)||0;
+  const qty=parseFloat(document.getElementById('m_qty')?.value)||0;
+  DB.alc.push({id:'it'+Date.now(),emoji:em,name:nm,cat,price,cost,pricePerKg,qty});
+  saveDB();closeModal();renderMenu();showToast(`เพิ่ม "${nm}" แล้ว`);
+}
+function saveEdit(id){
+  const it=DB.alc.find(x=>x.id===id);if(!it)return;
+  it.emoji=document.getElementById('m_em').value.trim()||it.emoji;
+  it.name=document.getElementById('m_nm').value.trim()||it.name;
+  it.cat=document.getElementById('m_ct').value;
+  it.price=parseFloat(document.getElementById('m_pr').value)||0;
+  it.cost=parseFloat(document.getElementById('m_co').value)||0;
+  it.pricePerKg=parseFloat(document.getElementById('m_pkg').value)||0;
+  it.qty=parseFloat(document.getElementById('m_qty').value)||0;
+  saveDB();closeModal();renderMenu();showToast('บันทึกแล้ว');
+}
+function confirmDel(id){
+  const it=DB.alc.find(x=>x.id===id);if(!it)return;
+  openModal('ยืนยันการลบ',`
+    <div class="mconfirm">ลบ <b>${it.emoji} ${it.name}</b> ?</div>
+    <div class="mrow">
+      <button class="mcancel" onclick="closeModal()">ยกเลิก</button>
+      <button class="mok red" onclick="doDel('${id}')">ลบ</button>
+    </div>`);
+}
+function doDel(id){
+  const it=DB.alc.find(x=>x.id===id);
+  DB.alc=DB.alc.filter(x=>x.id!==id);
+  delete setQty[id];
+  saveDB();closeModal();renderMenu();updateCalcBadge();
+  showToast(`ลบ "${it?.name}" แล้ว`);
+}
+
+// ═══ TAB 2: คำนวณ ════════════════════════════════════════════════════════════
+function renderCalcChips(){
+  const cats=getCatList();
+  document.getElementById('calcChips').innerHTML=cats.map(c=>
+    `<button class="chip${calcCat===c?' active':''}" onclick="calcCat='${c}';renderCalcChips();renderCalcItems()">${CAT_EMOJI[c]||'🍽'} ${c}</button>`
+  ).join('');
+}
+function renderCalcItems(){
+  const cats=getCatList().filter(c=>c!=='ทั้งหมด');
+  const show=calcCat==='ทั้งหมด'?cats:[calcCat];
+  let html='';
+  for(const cat of show){
+    const items=DB.alc.filter(x=>x.cat===cat);if(!items.length)continue;
+    html+=`<div style="font-family:'Chakra Petch',sans-serif;font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;padding:10px 14px 4px;margin-top:2px">${CAT_EMOJI[cat]||'🍽'} ${cat}</div>`;
+    html+=items.map(it=>{
+      const q=setQty[it.id]||0,has=q>0;
+      const cost=getItemCost(it);
+      return`<div class="calc-item${has?' hi':''}" id="ci-${it.id}">
+        <div class="ci-em">${it.emoji}</div>
+        <div class="ci-info">
+          <div class="ci-name">${it.name}</div>
+          <div class="ci-cost">ต้นทุน ${fmt(cost)}</div>
+        </div>
+        <div class="qc">
+          <button class="qb${q===0?' dim':''}" onclick="adjCalc('${it.id}',-1)">−</button>
+          <div class="qn${has?' hi':''}" id="cqn-${it.id}">${q}</div>
+          <button class="qb" onclick="adjCalc('${it.id}',1)">+</button>
+        </div>
+      </div>`;
+    }).join('');
+  }
+  document.getElementById('calcScroll').innerHTML=html||`<div class="empty">ไม่มีรายการ</div>`;
+  renderCalcResult();
+}
+function adjCalc(id,d){
+  setQty[id]=Math.max(0,(setQty[id]||0)+d);
+  const el=document.getElementById('ci-'+id);
+  if(el){
+    const q=setQty[id],has=q>0;
+    el.className=`calc-item${has?' hi':''}`;
+    const qn=document.getElementById('cqn-'+id);
+    if(qn){qn.textContent=q;qn.className=`qn${has?' hi':''}`;}
+    el.querySelectorAll('.qb')[0].className=`qb${q===0?' dim':''}`;
+  }
+  renderCalcResult();updateCalcBadge();
+}
+function renderCalcResult(){
+  const keys=Object.keys(setQty).filter(id=>setQty[id]>0);
+  const totalCost=keys.reduce((s,id)=>{
+    const it=DB.alc.find(x=>x.id===id);
+    return s+(it?getItemCost(it)*setQty[id]:0);
+  },0);
+  document.getElementById('cfCost').textContent=`${fmt(totalCost)}`;
+  const sell=parseFloat(document.getElementById('cfPrice')?.value)||0;
+  const prfRow=document.getElementById('cfPrfRow');
+  if(sell){
+    const prf=sell-totalCost,mg=sell>0?Math.round(prf/sell*100):0,pos=prf>=0;
+    prfRow.style.display='flex';
+    document.getElementById('cfPrfLbl').textContent=`${pos?'กำไร':'ขาดทุน'} (${mg}%)`;
+    document.getElementById('cfPrfLbl').style.color=pos?'var(--green)':'var(--red)';
+    document.getElementById('cfPrfVal').textContent=`${pos?'+':''}${fmt(prf)}`;
+    document.getElementById('cfPrfVal').style.color=pos?'var(--green)':'var(--red)';
+  } else prfRow.style.display='none';
+}
+function clearCalc(){
+  Object.keys(setQty).forEach(k=>setQty[k]=0);
+  document.getElementById('cfPrice').value='';
+  updateCalcBadge();renderCalcItems();
+}
+function updateCalcBadge(){
+  const total=Object.values(setQty).reduce((s,q)=>s+q,0);
+  const b=document.getElementById('calcBadge');
+  if(total>0){b.textContent=total;b.classList.add('show');}else b.classList.remove('show');
+}
+
+// ═══ TAB 3: สูตรอาหาร ════════════════════════════════════════════════════════
+function computeCosts(){
+  for(let p=0;p<2;p++){
+    for(const r of DB.recipes){
+      let t=0;
+      for(const ing of r.ings){
+        const pg=ing.sub
+          ?(()=>{const s=DB.recipes.find(x=>x.id===ing.sub);return s&&s.yieldGrams>0?s._totalCost/s.yieldGrams:0;})()
+          :(ing.pq>0?ing.p/ing.pq:0);
+        t+=pg*(ing.uq||0);
+      }
+      r._totalCost=t; r._cpg=r.yieldGrams>0?t/r.yieldGrams:0;
+    }
+  }
+}
+function renderRecipeList(){
+  computeCosts();
+  const el=document.getElementById('rcpList');
+  if(!DB.recipes.length){el.innerHTML=`<div class="empty">🌶 ยังไม่มีสูตร</div>`;return;}
+  el.innerHTML=DB.recipes.map(r=>{
+    const pc=r.menuLink?r._cpg*r.menuLink.qty:null;
+    const mn=r.menuLink?DB.alc.find(x=>x.id===r.menuLink.id)?.name||r.menuLink.id:'';
+    return`<div class="rcp-card" onclick="openDetail('${r.id}')">
+      <div class="rcp-em">${r.emoji}</div>
+      <div class="rcp-info">
+        <div class="rcp-name">${r.name}</div>
+        <div class="rcp-stats">ผลผลิต ${fmtG(r.yieldGrams)}g · /g ${r._cpg.toFixed(4)}${pc!==null?` · /ชุด ${fmt(pc)}`:''}</div>
+        ${mn?`<div style="font-size:11px;color:var(--green);margin-top:2px">→ ${mn}</div>`:''}
+      </div>
+      ${r.menuLink?`<span class="rcp-badge">เมนู</span>`:''}
+    </div>`;
+  }).join('');
+}
+function openDetail(id){
+  selRecipeId=id;
+  const d=document.getElementById('rcpDetail');
+  d.classList.add('open');
+  d.scrollTop=0;
+  renderDetail();
+}
+function closeDetail(){
+  document.getElementById('rcpDetail').classList.remove('open');
+  renderRecipeList();
+}
+function renderDetail(){
+  const rec=DB.recipes.find(r=>r.id===selRecipeId);if(!rec)return;
+  computeCosts();
+  document.getElementById('rcpDetailTitle').textContent=`${rec.emoji} ${rec.name}`;
+  const total=rec._totalCost||0,cpg=rec._cpg||0;
+  const pc=rec.menuLink?cpg*rec.menuLink.qty:null;
+  const mn=rec.menuLink?DB.alc.find(x=>x.id===rec.menuLink.id)?.name||rec.menuLink.id:'';
+
+  const ingRows=rec.ings.map((ing,i)=>{
+    if(ing.sub){
+      const sub=DB.recipes.find(r=>r.id===ing.sub);
+      const cpgSub=sub&&sub.yieldGrams>0?sub._totalCost/sub.yieldGrams:0;
+      const ingCost=cpgSub*(ing.uq||0);
+      return`<div class="ing-card">
+        <div class="ing-name-row">
+          <div style="flex:1"><span class="sub-badge">🔗 ${sub?sub.name:ing.sub}</span></div>
+          <button class="ing-del" onclick="delIng('${rec.id}',${i})">×</button>
+        </div>
+        <div class="ing-fields">
+          <div><div class="ing-field-lbl">/g</div><div class="ing-derived">${cpgSub.toFixed(4)}</div></div>
+          <div><div class="ing-field-lbl">ใช้ (g)</div><input class="ing-inp" type="number" inputmode="decimal" value="${fmtG(ing.uq)}" data-id="${rec.id}" data-idx="${i}" data-field="uq" oninput="onIngInp(this)"></div>
+          <div><div class="ing-field-lbl">ต้นทุน</div><div class="ing-derived" id="icost-${rec.id}-${i}">${fmt(ingCost)}</div></div>
+        </div>
+      </div>`;
+    }
+    const pg=ing.pq>0?ing.p/ing.pq:0;
+    const ingCost=pg*(ing.uq||0);
+    return`<div class="ing-card">
+      <div class="ing-name-row">
+        <input class="ing-nm-inp" value="${ing.n}" placeholder="ชื่อวัตถุดิบ" data-id="${rec.id}" data-idx="${i}" data-field="n" oninput="onIngInp(this)">
+        <button class="ing-del" onclick="delIng('${rec.id}',${i})">×</button>
+      </div>
+      <div class="ing-fields">
+        <div><div class="ing-field-lbl">ราคาซื้อ</div><input class="ing-inp" type="number" inputmode="decimal" value="${ing.p||''}" placeholder="0" data-id="${rec.id}" data-idx="${i}" data-field="p" oninput="onIngInp(this)"></div>
+        <div><div class="ing-field-lbl">ปริมาณซื้อ (g)</div><input class="ing-inp" type="number" inputmode="decimal" value="${ing.pq||''}" placeholder="0" data-id="${rec.id}" data-idx="${i}" data-field="pq" oninput="onIngInp(this)"></div>
+        <div><div class="ing-field-lbl">ใช้ (g)</div><input class="ing-inp" type="number" inputmode="decimal" value="${fmtG(ing.uq)}" placeholder="0" data-id="${rec.id}" data-idx="${i}" data-field="uq" oninput="onIngInp(this)"></div>
+      </div>
+      <div class="ing-cost-row">
+        <span class="ing-cost-lbl">/g ${ing.pq>0?pg.toFixed(4):'–'} &nbsp;·&nbsp; ต้นทุน</span>
+        <span class="ing-cost-val" id="icost-${rec.id}-${i}">${fmt(ingCost)}</span>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('rcpDetailScroll').innerHTML=`
+    <div class="rcp-hdr-card">
+      <div class="rcp-hdr-row">
+        <input class="rcp-em-inp" value="${rec.emoji}" data-id="${rec.id}" data-field="emoji" oninput="onHdrInp(this)">
+        <input class="rcp-nm-inp" value="${rec.name}" data-id="${rec.id}" data-field="name" oninput="onHdrInp(this)">
+      </div>
+      <div class="yield-row">
+        <span class="yield-lbl">ผลผลิต</span>
+        <input class="yield-inp" type="number" value="${rec.yieldGrams}" data-id="${rec.id}" data-field="yieldGrams" oninput="onHdrInp(this)">
+        <span class="yield-lbl">g</span>
+        <button class="del-rcp-btn" onclick="confirmDelRecipe('${rec.id}')">🗑 ลบ</button>
+      </div>
+    </div>
+    <div class="sum-strip">
+      <div class="sum-item"><div class="s-lbl">ต้นทุนรวม</div><div class="s-val orange" id="stotal">${fmt(total)}</div></div>
+      <div class="sum-item"><div class="s-lbl">ผลผลิต</div><div class="s-val blue">${fmtG(rec.yieldGrams)}g</div></div>
+      <div class="sum-item"><div class="s-lbl">ต้นทุน/กรัม</div><div class="s-val orange" id="scpg">${cpg.toFixed(4)} </div></div>
+      <div class="sum-item"><div class="s-lbl">ต้นทุน/กิโล</div><div class="s-val green">${(cpg*1000).toFixed(2)} </div></div>
+      ${pc!==null?`<div class="link-pill"><div class="lp-title">→ ใช้ใน "${mn}" (${fmtG(rec.menuLink.qty)}g/ชุด)</div><div class="lp-vals"><span class="lp-name">ต้นทุน/ชุด</span><span class="lp-cost">${fmt(pc)}</span></div></div>`:''}
+    </div>
+    <div class="ing-section">
+      <div class="ing-sec-hdr">วัตถุดิบ (${rec.ings.length} รายการ)</div>
+      ${ingRows||`<div class="empty" style="padding:20px">ยังไม่มีวัตถุดิบ</div>`}
+      <div class="ing-add-row">
+        <button class="add-ing-btn" onclick="addIng('${rec.id}')">+ เพิ่มวัตถุดิบ</button>
+        <button class="add-sub-btn" onclick="openAddSubIng('${rec.id}')">🔗 จากสูตร</button>
+      </div>
+    </div>`;
+}
+function onHdrInp(inp){
+  const rec=DB.recipes.find(r=>r.id===inp.dataset.id);if(!rec)return;
+  const f=inp.dataset.field;
+  rec[f]=f==='yieldGrams'?(parseFloat(inp.value)||0):inp.value;
+  autoSave(true);
+}
+function onIngInp(inp){
+  const rec=DB.recipes.find(r=>r.id===inp.dataset.id);if(!rec)return;
+  const idx=parseInt(inp.dataset.idx),f=inp.dataset.field;
+  const ing=rec.ings[idx];if(!ing)return;
+  ing[f]=f==='n'?inp.value:(parseFloat(inp.value)||0);
+  computeCosts();updateSummaryDOM(rec);autoSave(false);
+}
+function updateSummaryDOM(rec){
+  const t=rec._totalCost||0,cpg=rec._cpg||0;
+  const st=document.getElementById('stotal'),sc=document.getElementById('scpg');
+  if(st)st.textContent=''+fmt(t);
+  if(sc)sc.textContent=cpg.toFixed(4)+'';
+  rec.ings.forEach((ing,i)=>{
+    const el=document.getElementById(`icost-${rec.id}-${i}`);if(!el)return;
+    const ingCost=ing.sub
+      ?(()=>{const s=DB.recipes.find(r=>r.id===ing.sub);return s&&s.yieldGrams>0?(s._totalCost/s.yieldGrams)*(ing.uq||0):0;})()
+      :(ing.pq>0?(ing.p/ing.pq)*(ing.uq||0):0);
+    el.textContent=''+fmt(ingCost);
+  });
+}
+function autoSave(reList){
+  clearTimeout(_saveTimer);
+  _saveTimer=setTimeout(()=>{saveDB();computeCosts();if(reList)renderDetail();},600);
+}
+function addIng(recId){
+  const rec=DB.recipes.find(r=>r.id===recId);if(!rec)return;
+  rec.ings.push({n:'',p:0,pq:1000,uq:0});
+  saveDB();computeCosts();renderDetail();
+}
+function delIng(recId,idx){
+  const rec=DB.recipes.find(r=>r.id===recId);if(!rec)return;
+  rec.ings.splice(idx,1);saveDB();computeCosts();renderDetail();
+}
+function openAddSubIng(recId){
+  const others=DB.recipes.filter(r=>r.id!==recId);
+  if(!others.length){showToast('ไม่มีสูตรอื่น',true);return;}
+  const opts=others.map(r=>`<option value="${r.id}">${r.emoji} ${r.name}</option>`).join('');
+  openModal('🔗 เพิ่มจากสูตรอื่น',`
+    <label class="mlbl">เลือกสูตร</label>
+    <select class="minp" id="sub_sel" style="color:var(--text)">${opts}</select>
+    <label class="mlbl">ปริมาณที่ใช้ (g)</label>
+    <input class="minp" id="sub_qty" type="number" value="100" inputmode="decimal">
+    <div class="mrow">
+      <button class="mcancel" onclick="closeModal()">ยกเลิก</button>
+      <button class="mok" onclick="confAddSubIng('${recId}')">+ เพิ่ม</button>
+    </div>`);
+}
+function confAddSubIng(recId){
+  const rec=DB.recipes.find(r=>r.id===recId);if(!rec)return;
+  const subId=document.getElementById('sub_sel').value;
+  const qty=parseFloat(document.getElementById('sub_qty').value)||0;
+  const sub=DB.recipes.find(r=>r.id===subId);
+  rec.ings.push({n:sub?sub.name:subId,p:0,pq:0,uq:qty,sub:subId});
+  saveDB();closeModal();computeCosts();renderDetail();
+}
+function openAddRecipe(){
+  openModal('+ สูตรใหม่',`
+    <label class="mlbl">Emoji</label>
+    <input class="minp" id="m_em" value="🍽" style="font-size:20px;text-align:center;padding:8px">
+    <label class="mlbl">ชื่อสูตร</label>
+    <input class="minp" id="m_nm" placeholder="เช่น เบสซุปต้มยำ">
+    <label class="mlbl">ผลผลิต (g)</label>
+    <input class="minp" id="m_yd" type="number" value="500" inputmode="decimal">
+    <div class="mrow">
+      <button class="mcancel" onclick="closeModal()">ยกเลิก</button>
+      <button class="mok" onclick="confAddRecipe()">สร้าง</button>
+    </div>`);
+  setTimeout(()=>document.getElementById('m_nm')?.focus(),150);
+}
+function confAddRecipe(){
+  const nm=document.getElementById('m_nm')?.value.trim();
+  if(!nm){showToast('กรอกชื่อก่อน',true);return;}
+  const em=document.getElementById('m_em')?.value.trim()||'🍽';
+  const yd=parseFloat(document.getElementById('m_yd')?.value)||500;
+  const id='rcp_'+Date.now();
+  DB.recipes.push({id,name:nm,emoji:em,yieldGrams:yd,ings:[]});
+  saveDB();closeModal();computeCosts();openDetail(id);showToast(`สร้างสูตร "${nm}" แล้ว`);
+}
+function confirmDelRecipe(id){
+  const rec=DB.recipes.find(r=>r.id===id);if(!rec)return;
+  openModal('ลบสูตร',`
+    <div class="mconfirm">ลบ <b>${rec.emoji} ${rec.name}</b> ?</div>
+    <div class="mrow">
+      <button class="mcancel" onclick="closeModal()">ยกเลิก</button>
+      <button class="mok red" onclick="doDelRecipe('${id}')">ลบ</button>
+    </div>`);
+}
+function doDelRecipe(id){
+  DB.recipes=DB.recipes.filter(r=>r.id!==id);
+  saveDB();closeModal();computeCosts();closeDetail();showToast('ลบสูตรแล้ว');
+}
+function syncToMenu(){
+  if(!DB.alc||!DB.alc.length){showToast('ไม่พบข้อมูลเมนู',true);return;}
+  computeCosts();let updated=0;
+  for(const rec of DB.recipes){
+    if(!rec.menuLink)continue;
+    const it=DB.alc.find(x=>x.id===rec.menuLink.id);if(!it)continue;
+    it.cost=parseFloat((rec._cpg*rec.menuLink.qty).toFixed(2));updated++;
+  }
+  saveDB();renderDetail();showToast(`อัปเดตต้นทุน ${updated} รายการแล้ว ✓`);
+}
+
+// ═══ CATEGORY MANAGER ════════════════════════════════════════════════════════
+function openCatMgr(){
+  openModal('⚙️ จัดการหมวดหมู่', buildCatBody());
+  setTimeout(()=>{const i=document.getElementById('nci');if(i)i.addEventListener('keydown',e=>{if(e.key==='Enter')confAddCat();});},40);
+}
+function buildCatBody(){
+  const cats=getCatList().filter(c=>c!=='ทั้งหมด');
+  const rows=cats.map(cat=>{
+    const cnt=DB.alc.filter(x=>x.cat===cat).length;
+    return`<div style="display:flex;align-items:center;gap:10px;padding:11px 12px;border-bottom:1px solid var(--border)">
+      <span style="font-size:18px;width:24px;text-align:center">${CAT_EMOJI[cat]||'🍽'}</span>
+      <span style="flex:1;font-size:13px;font-weight:600;color:var(--text)">${cat}</span>
+      <span style="font-family:'Chakra Petch',sans-serif;font-size:11px;color:var(--text3)">${cnt} รายการ</span>
+      <button style="padding:5px 12px;background:var(--rdim);border:1px solid rgba(224,80,80,.4);color:var(--red);border-radius:7px;font-size:11px;font-weight:600" onclick="confirmDelCat('${cat}')">ลบ</button>
+    </div>`;
+  }).join('');
+  return`<div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:14px;max-height:38vh;overflow-y:auto">
+    ${rows||'<div style="padding:16px;font-size:12px;color:var(--text3);text-align:center">ยังไม่มีหมวดหมู่</div>'}
+  </div>
+  <div style="font-family:Chakra Petch,sans-serif;font-size:10px;font-weight:600;color:var(--text3);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px">+ เพิ่มหมวดใหม่</div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <input class="minp" id="nce" value="🍽" style="width:52px;font-size:18px;padding:9px;text-align:center;flex-shrink:0">
+    <input class="minp" id="nci" placeholder="ชื่อหมวดหมู่" style="flex:1">
+    <button class="mok" style="width:auto;padding:11px 16px;flex-shrink:0" onclick="confAddCat()">+ เพิ่ม</button>
+  </div>`;
+}
+function confAddCat(){
+  const em=document.getElementById('nce')?.value.trim()||'🍽';
+  const nm=document.getElementById('nci')?.value.trim()||'';
+  if(!nm){showToast('กรอกชื่อก่อน',true);return;}
+  if(getCatList().includes(nm)){showToast(`"${nm}" มีแล้ว`,true);return;}
+  if(!DB.customCats) DB.customCats=[];
+  DB.customCats.push(nm); CAT_EMOJI[nm]=em;
+  saveDB(); showToast(`เพิ่มหมวด "${nm}" แล้ว`);
+  document.getElementById('mBody').innerHTML=buildCatBody();
+  setTimeout(()=>{const i=document.getElementById('nci');if(i)i.addEventListener('keydown',e=>{if(e.key==='Enter')confAddCat();});},30);
+  renderMenu();
+}
+function confirmDelCat(cat){
+  const cnt=DB.alc.filter(x=>x.cat===cat).length;
+  const others=getCatList().filter(c=>c!=='ทั้งหมด'&&c!==cat);
+  if(!cnt){
+    openModal(`ลบหมวด "${cat}"?`,`
+      <div class="mconfirm">ไม่มีรายการในหมวดนี้<br>ลบได้เลย</div>
+      <div class="mrow">
+        <button class="mcancel" onclick="openCatMgr()">ยกเลิก</button>
+        <button class="mok red" onclick="doDelCat('${cat}','delete','')">ลบหมวด</button>
+      </div>`);
+    return;
+  }
+  const opts=others.map(c=>`<option value="${c}">${CAT_EMOJI[c]||'🍽'} ${c}</option>`).join('');
+  openModal(`ลบหมวด "${cat}"`,`
+    <div style="font-size:13px;color:var(--text2);margin-bottom:12px">มี <b style="color:var(--accent)">${cnt} รายการ</b> ในหมวดนี้</div>
+    <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:12px">
+      <label style="display:flex;gap:10px;align-items:center;background:var(--card2);border:1px solid var(--border2);border-radius:9px;padding:12px">
+        <input type="radio" name="da" value="move" checked style="accent-color:var(--accent);width:16px;height:16px">
+        <span style="font-size:13px;font-weight:600">ย้ายไปหมวดอื่น</span>
+      </label>
+      <label style="display:flex;gap:10px;align-items:center;background:var(--card2);border:1px solid var(--border2);border-radius:9px;padding:12px">
+        <input type="radio" name="da" value="delete" style="accent-color:var(--red);width:16px;height:16px">
+        <span style="font-size:13px;font-weight:600;color:var(--red)">ลบรายการทั้งหมด</span>
+      </label>
+    </div>
+    <div id="mw"><select class="minp" id="moveTo" style="color:var(--text)">${opts}</select></div>
+    <div class="mrow">
+      <button class="mcancel" onclick="openCatMgr()">ยกเลิก</button>
+      <button class="mok red" onclick="doDelCatOk('${cat}')">ดำเนินการ</button>
+    </div>`);
+  setTimeout(()=>{
+    document.querySelectorAll('input[name="da"]').forEach(r=>r.addEventListener('change',()=>{
+      const w=document.getElementById('mw');if(w)w.style.display=r.value==='move'?'block':'none';
+    }));
+  },40);
+}
+function doDelCatOk(cat){
+  const r=document.querySelector('input[name="da"]:checked');
+  doDelCat(cat,r?r.value:'move',document.getElementById('moveTo')?.value||'');
+}
+function doDelCat(cat,action,moveTo){
+  const cnt=DB.alc.filter(x=>x.cat===cat).length;
+  if(action==='move'&&moveTo) DB.alc.forEach(it=>{if(it.cat===cat)it.cat=moveTo;});
+  else if(action==='delete') DB.alc=DB.alc.filter(x=>x.cat!==cat);
+  DB.customCats=(DB.customCats||[]).filter(c=>c!==cat);
+  if(DEFAULT_CATS.includes(cat)){
+    if(!DB.deletedDefaultCats)DB.deletedDefaultCats=[];
+    if(!DB.deletedDefaultCats.includes(cat))DB.deletedDefaultCats.push(cat);
+  }
+  delete CAT_EMOJI[cat];
+  if(menuCat===cat) menuCat='ทั้งหมด';
+  if(calcCat===cat) calcCat='ทั้งหมด';
+  saveDB();closeModal();renderMenu();
+  showToast(action==='move'&&cnt?`ย้าย ${cnt} รายการ → "${moveTo}"`:`ลบหมวด "${cat}" แล้ว`);
+}
+
+// ═══ MODAL / TOAST ═══════════════════════════════════════════════════════════
+function openModal(t,b){
+  document.getElementById('mTitle').textContent=t;
+  document.getElementById('mBody').innerHTML=b;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+function tryClose(e){if(e.target===document.getElementById('modal'))closeModal();}
+let _tt;
+function showToast(m,e=false){
+  const t=document.getElementById('toast');
+  t.textContent=m;t.className='toast show'+(e?' err':'');
+  clearTimeout(_tt);_tt=setTimeout(()=>t.className='toast',2300);
+}
+
+// ═══ INIT ════════════════════════════════════════════════════════════════════
+document.getElementById('shopLbl').textContent=DB.shop?.name||'ชาบู';
+(DB.customCats||[]).forEach(n=>{if(!CAT_EMOJI[n])CAT_EMOJI[n]='🍽';});
+function clock(){document.getElementById('clockEl').textContent=new Date().toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'});}
+clock();setInterval(clock,10000);
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
+document.querySelectorAll('.chips-wrap').forEach(el=>{
+  el.addEventListener('wheel',e=>{e.preventDefault();el.scrollLeft+=e.deltaY;},{passive:false});
+});
+saveDB();
+DB.alc.filter(x=>x.cat==='แพ็คเกจ').forEach(x=>setQty[x.id]=1);
+computeCosts();
+renderMenu();
+renderCalcChips();
+renderCalcItems();
+</script>
+</body>
+</html>
