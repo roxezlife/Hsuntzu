@@ -73,7 +73,8 @@ input,select,textarea{font-family:'Sarabun',sans-serif;outline:none;-webkit-appe
 .mc-chevron{font-size:14px;color:var(--text3);flex-shrink:0}
 
 /* FAB */
-.fab{position:fixed;bottom:calc(var(--nav-h) + 16px + env(safe-area-inset-bottom));right:16px;width:54px;height:54px;background:var(--accent);border-radius:50%;font-size:26px;font-weight:300;line-height:1;color:#000;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(56,189,248,.4);z-index:40;transition:transform .15s}
+.fab{position:fixed;bottom:calc(var(--nav-h) + 16px + env(safe-area-inset-bottom));right:16px;width:56px;height:56px;background:rgba(56,189,248,.15);border:2.5px solid #38bdf8;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 24px rgba(56,189,248,.35);z-index:40;transition:transform .15s}
+.fab:active{transform:scale(.9)}
 .fab:active{transform:scale(.9)}
 
 /* ── TAB 2: คำนวณ ── */
@@ -214,7 +215,12 @@ input,select,textarea{font-family:'Sarabun',sans-serif;outline:none;-webkit-appe
     </div>
     <div class="chips-wrap" id="menuChips"></div>
     <div id="menuList" class="item-list"></div>
-    <button class="fab" id="menuFab" onclick="openAdd()">＋</button>
+    <button class="fab" id="menuFab" onclick="openAdd()">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="11.5" y="3" width="3" height="20" rx="1.5" fill="#38bdf8"/>
+        <rect x="3" y="11.5" width="20" height="3" rx="1.5" fill="#38bdf8"/>
+      </svg>
+    </button>
   </div>
 
   <!-- ══ TAB 2: คำนวณ ══ -->
