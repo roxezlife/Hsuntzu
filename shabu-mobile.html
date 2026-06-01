@@ -1018,23 +1018,21 @@ renderCalcItems();
 
 // Firestore realtime sync
 let _firstLoad=true;
-FDOC.onSnapshot({includeMetadataChanges:true},snap=>{
-  const isRemote=!snap.metadata.hasPendingWrites&&!snap.metadata.fromCache;
+FDOC.onSnapshot(snap=>{
   if(!snap.exists){
-    if(_firstLoad){FDOC.set(JSON.parse(JSON.stringify(DB)));} // push local → cloud ครั้งแรก
+    if(_firstLoad) FDOC.set(JSON.parse(JSON.stringify(DB)));
     _firstLoad=false; return;
   }
   _firstLoad=false;
+  if(snap.metadata.hasPendingWrites) return; // เป็น write ของเราเอง ข้ามไป
   DB=snap.data();
   saveLocal();
   (DB.customCats||[]).forEach(n=>{if(!CAT_EMOJI[n])CAT_EMOJI[n]='🍽';});
   computeCosts();
-  if(isRemote){
-    if(curTab==='menu') renderMenu();
-    else if(curTab==='calc'){renderCalcChips();renderCalcItems();}
-    else if(curTab==='recipe') renderRecipeList();
-    showToast('ซิงค์แล้ว ✓');
-  }
+  if(curTab==='menu') renderMenu();
+  else if(curTab==='calc'){renderCalcChips();renderCalcItems();}
+  else if(curTab==='recipe') renderRecipeList();
+  showToast('ซิงค์แล้ว ✓');
 },e=>console.warn('Firestore error:',e));
 </script>
 </body>
