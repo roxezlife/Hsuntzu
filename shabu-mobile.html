@@ -562,7 +562,7 @@ function confAdd(){
   const pricePerKg=parseFloat(document.getElementById('m_pkg')?.value)||0;
   const qty=parseFloat(document.getElementById('m_qty')?.value)||0;
   DB.alc.push({id:'it'+Date.now(),emoji:em,name:nm,cat,price,cost,pricePerKg,qty});
-  saveDB();closeModal();renderMenu();showToast(`เพิ่ม "${nm}" แล้ว`);
+  saveDB();closeModal();renderMenu();
 }
 function saveEdit(id){
   const it=DB.alc.find(x=>x.id===id);if(!it)return;
@@ -573,7 +573,7 @@ function saveEdit(id){
   it.cost=parseFloat(document.getElementById('m_co').value)||0;
   it.pricePerKg=parseFloat(document.getElementById('m_pkg').value)||0;
   it.qty=parseFloat(document.getElementById('m_qty').value)||0;
-  saveDB();closeModal();renderMenu();showToast('บันทึกแล้ว');
+  saveDB();closeModal();renderMenu();
 }
 function confirmDel(id){
   const it=DB.alc.find(x=>x.id===id);if(!it)return;
@@ -589,7 +589,6 @@ function doDel(id){
   DB.alc=DB.alc.filter(x=>x.id!==id);
   delete setQty[id];
   saveDB();closeModal();renderMenu();updateCalcBadge();
-  showToast(`ลบ "${it?.name}" แล้ว`);
 }
 
 // ═══ TAB 2: คำนวณ ════════════════════════════════════════════════════════════
@@ -866,7 +865,7 @@ function confAddRecipe(){
   const yd=parseFloat(document.getElementById('m_yd')?.value)||500;
   const id='rcp_'+Date.now();
   DB.recipes.push({id,name:nm,emoji:em,yieldGrams:yd,ings:[]});
-  saveDB();closeModal();computeCosts();openDetail(id);showToast(`สร้างสูตร "${nm}" แล้ว`);
+  saveDB();closeModal();computeCosts();openDetail(id);
 }
 function confirmDelRecipe(id){
   const rec=DB.recipes.find(r=>r.id===id);if(!rec)return;
@@ -879,7 +878,7 @@ function confirmDelRecipe(id){
 }
 function doDelRecipe(id){
   DB.recipes=DB.recipes.filter(r=>r.id!==id);
-  saveDB();closeModal();computeCosts();closeDetail();showToast('ลบสูตรแล้ว');
+  saveDB();closeModal();computeCosts();closeDetail();
 }
 function syncToMenu(){
   if(!DB.alc||!DB.alc.length){showToast('ไม่พบข้อมูลเมนู',true);return;}
@@ -889,7 +888,7 @@ function syncToMenu(){
     const it=DB.alc.find(x=>x.id===rec.menuLink.id);if(!it)continue;
     it.cost=parseFloat((rec._cpg*rec.menuLink.qty).toFixed(2));updated++;
   }
-  saveDB();renderDetail();showToast(`อัปเดตต้นทุน ${updated} รายการแล้ว ✓`);
+  saveDB();renderDetail();
 }
 
 // ═══ CATEGORY MANAGER ════════════════════════════════════════════════════════
@@ -925,7 +924,7 @@ function confAddCat(){
   if(getCatList().includes(nm)){showToast(`"${nm}" มีแล้ว`,true);return;}
   if(!DB.customCats) DB.customCats=[];
   DB.customCats.push(nm); CAT_EMOJI[nm]=em;
-  saveDB(); showToast(`เพิ่มหมวด "${nm}" แล้ว`);
+  saveDB();
   document.getElementById('mBody').innerHTML=buildCatBody();
   setTimeout(()=>{const i=document.getElementById('nci');if(i)i.addEventListener('keydown',e=>{if(e.key==='Enter')confAddCat();});},30);
   renderMenu();
@@ -983,7 +982,6 @@ function doDelCat(cat,action,moveTo){
   if(menuCat===cat) menuCat='ทั้งหมด';
   if(calcCat===cat) calcCat='ทั้งหมด';
   saveDB();closeModal();renderMenu();
-  showToast(action==='move'&&cnt?`ย้าย ${cnt} รายการ → "${moveTo}"`:`ลบหมวด "${cat}" แล้ว`);
 }
 
 // ═══ MODAL / TOAST ═══════════════════════════════════════════════════════════
