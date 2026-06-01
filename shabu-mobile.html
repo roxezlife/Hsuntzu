@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>Hsuntzu Cost Cal</title>
 <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700&family=Chakra+Petch:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
 :root{
@@ -358,8 +360,24 @@ const DEFAULT_RECIPES=[
 ];
 
 // ═══ DB ══════════════════════════════════════════════════════════════════════
+// Firebase init
+firebase.initializeApp({
+  apiKey:"AIzaSyA-3e-stiPH_cjozK0DDWLnSJJ1RKoHSEE",
+  authDomain:"hsuztzu.firebaseapp.com",
+  projectId:"hsuztzu",
+  storageBucket:"hsuztzu.firebasestorage.app",
+  messagingSenderId:"468821899233",
+  appId:"1:468821899233:web:d28800b9cbef145831c4a0"
+});
+const fsdb=firebase.firestore();
+const FDOC=fsdb.collection('shabu').doc('main');
+
 function loadDB(){try{const r=localStorage.getItem(SK);if(r)return JSON.parse(r);}catch(e){}return null;}
-function saveDB(){try{localStorage.setItem(SK,JSON.stringify(DB));}catch(e){}}
+function saveLocal(){try{localStorage.setItem(SK,JSON.stringify(DB));}catch(e){}}
+function saveDB(){
+  saveLocal();
+  FDOC.set(JSON.parse(JSON.stringify(DB))).catch(e=>console.warn('Firestore:',e));
+}
 let DB=loadDB()||{shop:{name:'Hsuntzu Cost Cal'},alc:JSON.parse(JSON.stringify(DEFAULT_ALC)),cart:[],orders:[],customCats:[],deletedDefaultCats:[]};
 if(!DB.alc||!DB.alc.length) DB.alc=JSON.parse(JSON.stringify(DEFAULT_ALC));
 if(!DB.deletedDefaultCats) DB.deletedDefaultCats=[];
@@ -992,12 +1010,32 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeModal();});
 document.querySelectorAll('.chips-wrap').forEach(el=>{
   el.addEventListener('wheel',e=>{e.preventDefault();el.scrollLeft+=e.deltaY;},{passive:false});
 });
-saveDB();
 DB.alc.filter(x=>x.cat==='แพ็คเกจ').forEach(x=>setQty[x.id]=1);
 computeCosts();
 renderMenu();
 renderCalcChips();
 renderCalcItems();
+
+// Firestore realtime sync
+let _firstLoad=true;
+FDOC.onSnapshot({includeMetadataChanges:true},snap=>{
+  const isRemote=!snap.metadata.hasPendingWrites&&!snap.metadata.fromCache;
+  if(!snap.exists){
+    if(_firstLoad){FDOC.set(JSON.parse(JSON.stringify(DB)));} // push local → cloud ครั้งแรก
+    _firstLoad=false; return;
+  }
+  _firstLoad=false;
+  DB=snap.data();
+  saveLocal();
+  (DB.customCats||[]).forEach(n=>{if(!CAT_EMOJI[n])CAT_EMOJI[n]='🍽';});
+  computeCosts();
+  if(isRemote){
+    if(curTab==='menu') renderMenu();
+    else if(curTab==='calc'){renderCalcChips();renderCalcItems();}
+    else if(curTab==='recipe') renderRecipeList();
+    showToast('ซิงค์แล้ว ✓');
+  }
+},e=>console.warn('Firestore error:',e));
 </script>
 </body>
 </html>
