@@ -16,7 +16,7 @@
   --red:#ef4444;--rdim:rgba(239,68,68,.1);
   --green:#4ade80;--gdim:rgba(74,222,128,.1);
   --blue:#60a5fa;--bdim:rgba(96,165,250,.1);
-  --text:#f5f5f5;--text2:#666666;--text3:#2a2a2a;
+  --text:#f5f5f5;--text2:#666666;--text3:#555555;
   --r:12px;--nav-h:60px;--top-h:50px;
 }
 body{font-family:'Sarabun',sans-serif;background:var(--bg);color:var(--text);height:100dvh;display:flex;flex-direction:column;overflow:hidden}
@@ -341,26 +341,40 @@ const DEFAULT_ALC=[
 ];
 const DEFAULT_RECIPES=[
   {id:'rcp_mala_paste',name:'พริกแกงหม่าล่า',emoji:'🌶️',yieldGrams:1100,ings:[
-    {n:'น้ำมันพืช',p:245,pq:5000,uq:700},{n:'พริกแห้ง',p:989,pq:9000,uq:200},
-    {n:'หอมแดง',p:85,pq:500,uq:30},{n:'ขิง',p:69,pq:900,uq:30},
-    {n:'ต้นหอม',p:95,pq:1000,uq:20},{n:'ผักชี',p:99,pq:1000,uq:20},
-    {n:'เหล้าจีน',p:212,pq:640,uq:60},{n:'ซอสเสฉวน (Dou Ban Jiang)',p:36,pq:500,uq:25},
-    {n:'พริกไทยเสฉวน',p:238,pq:1000,uq:5},{n:'เม็ดหม่าล่า (ฮวาเจียว)',p:396,pq:1000,uq:5},
-    {n:'อบเชย',p:216,pq:1000,uq:5},{n:'ใบกระวาน',p:120,pq:800,uq:5},
-    {n:'โป๊ยกัก',p:180,pq:1000,uq:5},{n:'ลูกกระวานสีขาว',p:449,pq:1000,uq:5},
-    {n:'เมล็ดยี่หร่า',p:218,pq:1000,uq:5},{n:'เกร็ดน้ำตาล',p:398,pq:8000,uq:5},
-    {n:'เกลือ',p:50,pq:5000,uq:5},{n:'ผงไก่',p:165,pq:1500,uq:5},{n:'ผงชูรส',p:328,pq:3000,uq:5},
+    {n:'น้ำมันพืช',p:245,pq:5000,uq:300},
+    {n:'พริกแห้ง',p:989,pq:9000,uq:50},
+    {n:'อบเชย',p:216,pq:1000,uq:5},
+    {n:'โป๊ยกัก',p:180,pq:1000,uq:3},
+    {n:'ใบกระวาน',p:120,pq:800,uq:1},
+    {n:'พริกไทยเสฉวน(ชวงเจีย สีแดง)',p:238,pq:1000,uq:20},
+    {n:'เม็ดหม่าล่า(ฮวาเจียว สีเขียว)',p:396,pq:1000,uq:25},
+    {n:'ลูกกระวานสีขาว',p:449,pq:1000,uq:5},
+    {n:'เมล็ดยี่หร่า',p:218,pq:1000,uq:5},
+    {n:'เมล็ดเทียนข้าวเปลือก',p:35,pq:200,uq:5},
+    {n:'ลูกผักชี',p:0,pq:1000,uq:3},
+    {n:'กานพลู',p:0,pq:1000,uq:0.5},
+    {n:'เหล้าจีน',p:212,pq:640,uq:60},
+    {n:'ซอสเสฉวน (Dou Ban Jiang)',p:36,pq:500,uq:20},
+    {n:'ซีอิ๊วขาว',p:244,pq:4500,uq:5},
+    {n:'เกลือ',p:50,pq:5000,uq:5},
+    {n:'น้ำเชื่อม',p:398,pq:8000,uq:5},
+    {n:'ผงไก่',p:165,pq:1500,uq:5},
+    {n:'ผงชูรส',p:328,pq:3000,uq:5},
+    {n:'ต้นหอม',p:95,pq:1000,uq:20},
+    {n:'ผักชี',p:99,pq:1000,uq:20},
+    {n:'ขิง',p:69,pq:900,uq:20},
+    {n:'หอมแดง',p:85,pq:500,uq:30},
   ]},
-  {id:'rcp_soup_mala',name:'เบสซุปหม่าล่า',emoji:'🍲',yieldGrams:580,menuLink:{id:'p35',qty:580},ings:[
-    {n:'น้ำ',p:0,pq:1,uq:500},{n:'น้ำตาลกรวด',p:120,pq:2000,uq:5},
+  {id:'rcp_soup_mala',name:'เบสซุปหม่าล่า',emoji:'🍲',yieldGrams:500,menuLink:{id:'p35',qty:500},ings:[
+    {n:'น้ำ',p:0,pq:1,uq:400},{n:'น้ำเชื่อม',p:120,pq:2000,uq:5},
     {n:'เกลือ',p:49,pq:5000,uq:10},{n:'ซีอิ้วขาว',p:244,pq:4500,uq:15},
-    {n:'พริกแกงหม่าล่า',p:0,pq:0,uq:70,sub:'rcp_mala_paste'},
+    {n:'พริกแกงหม่าล่า',p:0,pq:0,uq:50,sub:'rcp_mala_paste'},
     {n:'ผงปรุงรส รสหมู/ไก่',p:165,pq:1500,uq:10},{n:'น้ำพริกเผา',p:115,pq:900,uq:5},
   ]},
-  {id:'rcp_soup_mala_thick',name:'เบสซุปหม่าล่าน้ำข้น',emoji:'🍲',yieldGrams:580,menuLink:{id:'p37',qty:580},ings:[
+  {id:'rcp_soup_mala_thick',name:'เบสซุปหม่าล่าน้ำข้น',emoji:'🍲',yieldGrams:500,menuLink:{id:'p37',qty:500},ings:[
     {n:'ซอสเสฉวน',p:68,pq:500,uq:15},
-    {n:'พริกแกงหม่าล่า',p:0,pq:0,uq:70,sub:'rcp_mala_paste'},
-    {n:'นม',p:54,pq:1000,uq:150},{n:'น้ำเปล่า',p:0,pq:1,uq:350},
+    {n:'พริกแกงหม่าล่า',p:0,pq:0,uq:50,sub:'rcp_mala_paste'},
+    {n:'นม',p:54,pq:1000,uq:120},{n:'น้ำเปล่า',p:0,pq:1,uq:280},
     {n:'ซีอิ้วขาว',p:244,pq:4500,uq:15},
     {n:'เกลือ',p:49,pq:5000,uq:5},{n:'ผงปรุงรสหมู',p:165,pq:1500,uq:5},
   ]},
@@ -392,7 +406,7 @@ if(!DB.customCats) DB.customCats=[];
 if(!DB.recipes){DB.recipes=JSON.parse(JSON.stringify(DEFAULT_RECIPES));saveDB();}
 const RM=['rcp_base_sesame','rcp_sauce_sesame','rcp_sauce_mala','rcp_soup_namdham'];
 if(DB.recipes.some(r=>RM.includes(r.id))){DB.recipes=DB.recipes.filter(r=>!RM.includes(r.id));saveDB();}
-(function(){let ch=false;DB.recipes=DB.recipes.map(r=>{const d=DEFAULT_RECIPES.find(x=>x.id===r.id&&(r.id==='rcp_soup_mala'||r.id==='rcp_soup_mala_thick'));if(d&&r.yieldGrams<500){ch=true;return JSON.parse(JSON.stringify(d));}return r;});if(ch)saveDB();})();
+(function(){let ch=false;DB.recipes=DB.recipes.map(r=>{const d=DEFAULT_RECIPES.find(x=>x.id===r.id&&(r.id==='rcp_soup_mala'||r.id==='rcp_soup_mala_thick'||r.id==='rcp_mala_paste'));if(!d)return r;if((r.id==='rcp_soup_mala'||r.id==='rcp_soup_mala_thick')&&r.yieldGrams!==500){ch=true;return JSON.parse(JSON.stringify(d));}if(r.id==='rcp_mala_paste'&&(r.ings.length<23||(r.ings.find(x=>x.n==='น้ำมันพืช')?.uq||0)>300)){ch=true;return JSON.parse(JSON.stringify(d));}return r;});if(ch)saveDB();})();
 
 // MIGRATE
 (function migrate(){
@@ -685,6 +699,7 @@ function computeCosts(){
           :(ing.pq>0?ing.p/ing.pq:0);
         t+=pg*(ing.uq||0);
       }
+      r.yieldGrams=r.ings.reduce((s,i)=>s+(i.uq||0),0);
       r._totalCost=t; r._cpg=r.yieldGrams>0?t/r.yieldGrams:0;
     }
   }
@@ -770,17 +785,15 @@ function renderDetail(){
       </div>
       <div class="yield-row">
         <span class="yield-lbl">ผลผลิต</span>
-        <input class="yield-inp" type="number" value="${rec.yieldGrams}" data-id="${rec.id}" data-field="yieldGrams" oninput="onHdrInp(this)">
+        <span class="yield-val" id="syield-${rec.id}">${fmtG(rec.yieldGrams)}</span>
         <span class="yield-lbl">g</span>
         <button class="del-rcp-btn" onclick="confirmDelRecipe('${rec.id}')">🗑 ลบ</button>
       </div>
     </div>
     <div class="sum-strip">
       <div class="sum-item"><div class="s-lbl">ต้นทุนรวม</div><div class="s-val orange" id="stotal">${fmt(total)}</div></div>
-      <div class="sum-item"><div class="s-lbl">ผลผลิต</div><div class="s-val blue">${fmtG(rec.yieldGrams)}g</div></div>
-      <div class="sum-item"><div class="s-lbl">ต้นทุน/กรัม</div><div class="s-val orange" id="scpg">${cpg.toFixed(4)} </div></div>
-      <div class="sum-item"><div class="s-lbl">ต้นทุน/กิโล</div><div class="s-val green">${(cpg*1000).toFixed(2)} </div></div>
-      ${pc!==null?`<div class="link-pill"><div class="lp-title">→ ใช้ใน "${mn}" (${fmtG(rec.menuLink.qty)}g/ชุด)</div><div class="lp-vals"><span class="lp-name">ต้นทุน/ชุด</span><span class="lp-cost">${fmt(pc)}</span></div></div>`:''}
+      <div class="sum-item"><div class="s-lbl">ผลผลิต</div><div class="s-val blue" id="syield2-${rec.id}">${fmtG(rec.yieldGrams)}g</div></div>
+
     </div>
     <div class="ing-section">
       <div class="ing-sec-hdr">วัตถุดิบ (${rec.ings.length} รายการ)</div>
@@ -809,6 +822,8 @@ function updateSummaryDOM(rec){
   const st=document.getElementById('stotal'),sc=document.getElementById('scpg');
   if(st)st.textContent=''+fmt(t);
   if(sc)sc.textContent=cpg.toFixed(4)+'';
+  const sy=document.getElementById(`syield-${rec.id}`);if(sy)sy.textContent=fmtG(rec.yieldGrams);
+  const sy2=document.getElementById(`syield2-${rec.id}`);if(sy2)sy2.textContent=fmtG(rec.yieldGrams)+'g';
   rec.ings.forEach((ing,i)=>{
     const el=document.getElementById(`icost-${rec.id}-${i}`);if(!el)return;
     const ingCost=ing.sub
@@ -894,7 +909,7 @@ function syncToMenu(){
   for(const rec of DB.recipes){
     if(!rec.menuLink)continue;
     const it=DB.alc.find(x=>x.id===rec.menuLink.id);if(!it)continue;
-    it.cost=parseFloat((rec._cpg*rec.menuLink.qty).toFixed(2));updated++;
+    it.cost=parseFloat((rec._totalCost).toFixed(2));updated++;
   }
   saveDB();renderDetail();
 }
