@@ -351,17 +351,18 @@ const DEFAULT_RECIPES=[
     {n:'เมล็ดยี่หร่า',p:218,pq:1000,uq:5},{n:'เกร็ดน้ำตาล',p:398,pq:8000,uq:5},
     {n:'เกลือ',p:50,pq:5000,uq:5},{n:'ผงไก่',p:165,pq:1500,uq:5},{n:'ผงชูรส',p:328,pq:3000,uq:5},
   ]},
-  {id:'rcp_soup_mala',name:'เบสซุปหม่าล่า',emoji:'🍲',yieldGrams:270,menuLink:{id:'p35',qty:100},ings:[
-    {n:'น้ำ',p:0,pq:1,uq:100},{n:'น้ำตาลกรวด',p:120,pq:2000,uq:10},
-    {n:'เกลือ',p:49,pq:5000,uq:20},{n:'ซีอิ้วขาว',p:244,pq:4500,uq:30},
-    {n:'พริกแกงหม่าล่า',p:0,pq:0,uq:140,sub:'rcp_mala_paste'},
-    {n:'ผงปรุงรส รสหมู/ไก่',p:165,pq:1500,uq:20},{n:'น้ำพริกเผา',p:115,pq:900,uq:10},
+  {id:'rcp_soup_mala',name:'เบสซุปหม่าล่า',emoji:'🍲',yieldGrams:580,menuLink:{id:'p35',qty:580},ings:[
+    {n:'น้ำ',p:0,pq:1,uq:500},{n:'น้ำตาลกรวด',p:120,pq:2000,uq:5},
+    {n:'เกลือ',p:49,pq:5000,uq:10},{n:'ซีอิ้วขาว',p:244,pq:4500,uq:15},
+    {n:'พริกแกงหม่าล่า',p:0,pq:0,uq:70,sub:'rcp_mala_paste'},
+    {n:'ผงปรุงรส รสหมู/ไก่',p:165,pq:1500,uq:10},{n:'น้ำพริกเผา',p:115,pq:900,uq:5},
   ]},
-  {id:'rcp_soup_mala_thick',name:'เบสซุปหม่าล่าน้ำข้น',emoji:'🍲',yieldGrams:400,menuLink:{id:'p37',qty:130},ings:[
-    {n:'ซอสเสฉวน',p:68,pq:500,uq:30},
-    {n:'พริกแกงหม่าล่า',p:0,pq:0,uq:140,sub:'rcp_mala_paste'},
-    {n:'นม',p:54,pq:1000,uq:200},{n:'ซีอิ้วขาว',p:244,pq:4500,uq:30},
-    {n:'เกลือ',p:49,pq:5000,uq:10},{n:'ผงปรุงรสหมู',p:165,pq:1500,uq:10},
+  {id:'rcp_soup_mala_thick',name:'เบสซุปหม่าล่าน้ำข้น',emoji:'🍲',yieldGrams:580,menuLink:{id:'p37',qty:580},ings:[
+    {n:'ซอสเสฉวน',p:68,pq:500,uq:15},
+    {n:'พริกแกงหม่าล่า',p:0,pq:0,uq:70,sub:'rcp_mala_paste'},
+    {n:'นม',p:54,pq:1000,uq:150},{n:'น้ำเปล่า',p:0,pq:1,uq:350},
+    {n:'ซีอิ้วขาว',p:244,pq:4500,uq:15},
+    {n:'เกลือ',p:49,pq:5000,uq:5},{n:'ผงปรุงรสหมู',p:165,pq:1500,uq:5},
   ]},
 ];
 
@@ -391,6 +392,7 @@ if(!DB.customCats) DB.customCats=[];
 if(!DB.recipes){DB.recipes=JSON.parse(JSON.stringify(DEFAULT_RECIPES));saveDB();}
 const RM=['rcp_base_sesame','rcp_sauce_sesame','rcp_sauce_mala','rcp_soup_namdham'];
 if(DB.recipes.some(r=>RM.includes(r.id))){DB.recipes=DB.recipes.filter(r=>!RM.includes(r.id));saveDB();}
+(function(){let ch=false;DB.recipes=DB.recipes.map(r=>{const d=DEFAULT_RECIPES.find(x=>x.id===r.id&&(r.id==='rcp_soup_mala'||r.id==='rcp_soup_mala_thick'));if(d&&r.yieldGrams<500){ch=true;return JSON.parse(JSON.stringify(d));}return r;});if(ch)saveDB();})();
 
 // MIGRATE
 (function migrate(){
