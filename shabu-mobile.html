@@ -103,6 +103,8 @@ input,select,textarea{font-family:'Sarabun',sans-serif;outline:none;-webkit-appe
 .cf-prf-val{font-family:'Chakra Petch',sans-serif;font-size:20px;font-weight:700}
 .cf-clear{width:100%;padding:10px;background:transparent;border:1px solid var(--border2);color:var(--text3);border-radius:8px;font-size:13px;font-weight:600;margin-top:8px}
 .cf-clear:active{border-color:var(--red);color:var(--red)}
+.cf-list{width:100%;padding:10px;background:var(--adim);border:1px solid rgba(56,189,248,.3);color:var(--accent);border-radius:8px;font-size:13px;font-weight:600;margin-top:6px}
+.cf-list:active{background:rgba(56,189,248,.2)}
 
 /* ── TAB 3: สูตร ── */
 .rcp-list-wrap{padding:8px 14px 90px;display:flex;flex-direction:column;gap:8px}
@@ -241,6 +243,7 @@ input,select,textarea{font-family:'Sarabun',sans-serif;outline:none;-webkit-appe
         <span class="cf-prf-val" id="cfPrfVal">–</span>
       </div>
       <button class="cf-clear" onclick="clearCalc()">🗑 ล้างชุด</button>
+      <button class="cf-list" onclick="showCalcList()">📋 ดูรายการ</button>
     </div>
   </div>
 
@@ -726,6 +729,42 @@ function clearCalc(){
   Object.keys(setQty).forEach(k=>setQty[k]=0);
   document.getElementById('cfPrice').value='';
   updateCalcBadge();renderCalcItems();
+}
+function showCalcList(){
+  const keys=Object.keys(setQty).filter(id=>setQty[id]>0);
+  if(!keys.length){showToast('ยังไม่ได้เลือกรายการ',true);return;}
+  const totalCost=keys.reduce((s,id)=>{
+    const it=DB.alc.find(x=>x.id===id);
+    return s+(it?getItemCost(it)*setQty[id]:0);
+  },0);
+  const rows=keys.map(id=>{
+    const it=DB.alc.find(x=>x.id===id);if(!it)return'';
+    const cost=getItemCost(it),qty=setQty[id],sub=cost*qty;
+    return`<div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <span style="font-size:18px;width:24px;text-align:center;flex-shrink:0">${it.emoji}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${it.name}</div>
+        <div style="font-size:11px;color:var(--text3);font-family:'Chakra Petch',sans-serif">×${qty} · ${fmt(cost)}/ชิ้น</div>
+      </div>
+      <div style="font-family:'Chakra Petch',sans-serif;font-size:14px;font-weight:700;color:var(--accent);flex-shrink:0">${fmt(sub)}</div>
+    </div>`;
+  }).join('');
+  const sell=parseFloat(document.getElementById('cfPrice')?.value)||0;
+  const prf=sell?sell-totalCost:null;
+  const mg=sell>0?Math.round(prf/sell*100):null;
+  const pos=prf>=0;
+  openModal('📋 รายการในชุด',`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:0 12px;max-height:52vh;overflow-y:auto;margin-bottom:12px">${rows}</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;padding:6px 2px">
+      <span style="font-size:13px;color:var(--text2)">${keys.length} รายการ · ต้นทุนรวม</span>
+      <span style="font-family:'Chakra Petch',sans-serif;font-size:16px;font-weight:700;color:var(--red)">${fmt(totalCost)}</span>
+    </div>
+    ${sell?`<div style="display:flex;justify-content:space-between;align-items:center;padding:6px 2px;border-top:1px solid var(--border);margin-top:4px">
+      <span style="font-size:13px;color:var(--text2)">กำไร (${mg}%)</span>
+      <span style="font-family:'Chakra Petch',sans-serif;font-size:16px;font-weight:700;color:${pos?'var(--green)':'var(--red)'}">${pos?'+':''}${fmt(prf)}</span>
+    </div>`:''}
+    <button class="mcancel" style="width:100%;margin-top:12px" onclick="closeModal()">ปิด</button>
+  `);
 }
 function updateCalcBadge(){
   const total=Object.values(setQty).reduce((s,q)=>s+q,0);
