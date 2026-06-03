@@ -331,13 +331,13 @@ const DEFAULT_ALC=[
   {id:'p35', cat:'น้ำซุป', emoji:'🍲',name:'ซุปหมาล่า',                 price:50, cost:11,    pricePerKg:150, qty:0},
   {id:'p36', cat:'น้ำซุป', emoji:'🍲',name:'ซุปน้ำดำ',                  price:60, cost:12.32},
   {id:'p37', cat:'น้ำซุป', emoji:'🍲',name:'ซุปหมาล่าน้ำข้น',          price:65, cost:30},
-  {id:'pk_a1',cat:'แพ็คเกจ',emoji:'🥡',name:'ถ้วยพลาสติก',             price:4,  cost:2.17},
-  {id:'pk_a2',cat:'แพ็คเกจ',emoji:'🥣',name:'ถ้วยน้ำจิ้ม',             price:2,  cost:0.54},
-  {id:'pk_a3',cat:'แพ็คเกจ',emoji:'🥢',name:'ตะเกียบ',                 price:1,  cost:0.27},
-  {id:'pk_a4',cat:'แพ็คเกจ',emoji:'🍴',name:'ช้อนซ้อม',                price:3,  cost:1.4},
-  {id:'pk_a5',cat:'แพ็คเกจ',emoji:'🛍️',name:'ถุงใส่อาหาร',           price:9,  cost:6},
-  {id:'pk_a6',cat:'แพ็คเกจ',emoji:'🛍️',name:'ถุงแกงขุ่น',            price:1,  cost:0.05},
-  {id:'pk_a7',cat:'แพ็คเกจ',emoji:'⭕',name:'ยาง',                     price:1,  cost:0.01},
+  {id:'pk_a1',cat:'แพ็คเกจ',emoji:'🥡',name:'ถ้วยพลาสติก',             price:4,  cost:2.17, packPrice:65,  packQty:30},
+  {id:'pk_a2',cat:'แพ็คเกจ',emoji:'🥣',name:'ถ้วยน้ำจิ้ม',             price:2,  cost:0.54, packPrice:54,  packQty:100},
+  {id:'pk_a3',cat:'แพ็คเกจ',emoji:'🥢',name:'ตะเกียบ',                 price:1,  cost:0.27, packPrice:27,  packQty:100},
+  {id:'pk_a4',cat:'แพ็คเกจ',emoji:'🍴',name:'ช้อนซ้อม',                price:3,  cost:1.4,  packPrice:70,  packQty:50},
+  {id:'pk_a5',cat:'แพ็คเกจ',emoji:'🛍️',name:'ถุงใส่อาหาร',           price:9,  cost:6,    packPrice:60,  packQty:10},
+  {id:'pk_a6',cat:'แพ็คเกจ',emoji:'🛍️',name:'ถุงแกงขุ่น',            price:1,  cost:0.05, packPrice:50,  packQty:1000},
+  {id:'pk_a7',cat:'แพ็คเกจ',emoji:'⭕',name:'ยาง',                     price:1,  cost:0.01, packPrice:10,  packQty:1000},
 ];
 const DEFAULT_RECIPES=[
   {id:'rcp_mala_paste',name:'พริกแกงหม่าล่า',emoji:'🌶️',yieldGrams:1100,ings:[
@@ -413,10 +413,12 @@ if(DB.recipes.some(r=>RM.includes(r.id))){DB.recipes=DB.recipes.filter(r=>!RM.in
   if(DB.shop?.name==='ร้านชาบูนุ่มนิ่ม'){DB.shop.name='Hsuntzu Cost Cal';saveDB();}
   document.getElementById('shopLbl').textContent=DB.shop?.name||'Hsuntzu Cost Cal';
   let changed=false;
+  const PKG_PACK={pk_a1:{pp:65,pq:30},pk_a2:{pp:54,pq:100},pk_a3:{pp:27,pq:100},pk_a4:{pp:70,pq:50},pk_a5:{pp:60,pq:10},pk_a6:{pp:50,pq:1000},pk_a7:{pp:10,pq:1000}};
   DB.alc.forEach(it=>{
     if(it.cat==='ทะเล'||it.cat==='ลูกชิ้น'){it.cat='วัตถุดิบเสริม';changed=true;}
     if(it.id==='p3'&&it.price===10000){it.price=22;changed=true;}
     if(it.id==='p31'&&it.name==='เส้นใหญ่'){it.name='เส้นมันเทศใหญ่';changed=true;}
+    if(it.cat==='แพ็คเกจ'&&PKG_PACK[it.id]&&!it.packPrice){it.packPrice=PKG_PACK[it.id].pp;it.packQty=PKG_PACK[it.id].pq;changed=true;}
   });
   DB.alc=DB.alc.filter(x=>x.id!=='p12'&&x.id!=='p15'&&x.id!=='p_fth');
   if(!DB.alc.find(x=>x.id==='p_fthm')){DB.alc.push({id:'p_fthm',cat:'วัตถุดิบเสริม',emoji:'🌀',name:'ฟองเต้าฮู้ม้วน',price:0,cost:0});changed=true;}
@@ -437,7 +439,10 @@ function getCatList(){
   const del=DB.deletedDefaultCats||[],custom=DB.customCats||[];
   return['ทั้งหมด',...DEFAULT_CATS.filter(c=>!del.includes(c)),...custom.filter(c=>!DEFAULT_CATS.includes(c))];
 }
-function getItemCost(it){const a=calcAuto(it.pricePerKg,it.qty);return a!==null?a:it.cost;}
+function getItemCost(it){
+  if(it.cat==='แพ็คเกจ'&&it.packPrice>0&&it.packQty>0) return it.packPrice/it.packQty;
+  const a=calcAuto(it.pricePerKg,it.qty);return a!==null?a:it.cost;
+}
 
 // ═══ TABS ════════════════════════════════════════════════════════════════════
 function switchTab(t){
@@ -479,11 +484,14 @@ function renderMenu(){
 function menuCard(it){
   const cost=getItemCost(it);
   const prf=it.price-cost,mg=it.price>0?Math.round(prf/it.price*100):0,pos=prf>=0;
+  const sub=it.cat==='แพ็คเกจ'&&it.packPrice&&it.packQty
+    ?`${it.cat} · ${it.packPrice}฿/${it.packQty}ชิ้น · ต้นทุน ${fmt(cost)}`
+    :`${it.cat} · ต้นทุน ${fmt(cost)}`;
   return`<div class="mcard" onclick="openEditModal('${it.id}')">
     <div class="mc-emoji">${it.emoji}</div>
     <div class="mc-info">
       <div class="mc-name">${it.name}</div>
-      <div class="mc-cat">${it.cat} · ต้นทุน ${fmt(cost)}</div>
+      <div class="mc-cat">${sub}</div>
     </div>
     <div class="mc-right">
       <div class="mc-price">${it.price>0?`${fmt(it.price)}`:'–'}</div>
@@ -496,27 +504,17 @@ function menuCard(it){
 // ═══ ADD / EDIT MODAL ════════════════════════════════════════════════════════
 function openAdd(){
   _mManual=false;
+  const initCat=menuCat!=='ทั้งหมด'?menuCat:(getCatList().filter(c=>c!=='ทั้งหมด')[0]||'หมู');
   const opts=getCatList().filter(c=>c!=='ทั้งหมด').map(c=>
-    `<option value="${c}" ${c===menuCat&&menuCat!=='ทั้งหมด'?'selected':''}>${CAT_EMOJI[c]||''} ${c}</option>`).join('');
+    `<option value="${c}" ${c===initCat?'selected':''}>${CAT_EMOJI[c]||''} ${c}</option>`).join('');
   openModal('+ เพิ่มรายการใหม่',`
     <div style="display:grid;grid-template-columns:58px 1fr;gap:10px;align-items:end">
       <div><label class="mlbl">Emoji</label><input class="minp" id="m_em" value="🍽" style="font-size:20px;text-align:center;padding:9px"></div>
       <div><label class="mlbl">ชื่อ</label><input class="minp" id="m_nm" placeholder="ชื่อรายการ"></div>
     </div>
     <label class="mlbl">หมวดหมู่</label>
-    <select class="minp" id="m_ct" style="color:var(--text)">${opts}</select>
-    <div class="msep">ต้นทุน</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div><label class="mlbl">ราคา/กก</label><input class="minp" id="m_pkg" type="number" inputmode="decimal" placeholder="–" oninput="mAC()"></div>
-      <div><label class="mlbl">ปริมาณ (g)</label><input class="minp" id="m_qty" type="number" inputmode="decimal" placeholder="70" oninput="mAC()"></div>
-    </div>
-    <div class="mac" id="m_ac"></div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div><label class="mlbl">ต้นทุน/ชุด <span id="m_cn" style="color:var(--text3);font-size:10px"></span></label>
-        <input class="minp" id="m_co" type="number" inputmode="decimal" placeholder="0" oninput="_mManual=true;document.getElementById('m_cn').textContent='(กรอกเอง)';mPv()"></div>
-      <div><label class="mlbl">ราคาขาย</label><input class="minp" id="m_pr" type="number" inputmode="decimal" placeholder="0" oninput="mPv()"></div>
-    </div>
-    <div class="mpv" id="m_pv">กรอกราคาเพื่อดูกำไร</div>
+    <select class="minp" id="m_ct" style="color:var(--text)" onchange="onModalCatChange(this.value)">${opts}</select>
+    <div id="m_cost_section">${initCat==='แพ็คเกจ'?pkgCostHTML():normalCostHTML()}</div>
     <div class="mrow">
       <button class="mcancel" onclick="closeModal()">ยกเลิก</button>
       <button class="mok" onclick="confAdd()">+ เพิ่ม</button>
@@ -528,32 +526,20 @@ function openEditModal(id){
   _mManual=false;
   const opts=getCatList().filter(c=>c!=='ทั้งหมด').map(c=>
     `<option value="${c}" ${c===it.cat?'selected':''}>${CAT_EMOJI[c]||''} ${c}</option>`).join('');
-  const cost=getItemCost(it);
   openModal(`${it.emoji} ${it.name}`,`
     <div style="display:grid;grid-template-columns:58px 1fr;gap:10px;align-items:end">
       <div><label class="mlbl">Emoji</label><input class="minp" id="m_em" value="${it.emoji}" style="font-size:20px;text-align:center;padding:9px"></div>
       <div><label class="mlbl">ชื่อ</label><input class="minp" id="m_nm" value="${it.name}"></div>
     </div>
     <label class="mlbl">หมวดหมู่</label>
-    <select class="minp" id="m_ct" style="color:var(--text)">${opts}</select>
-    <div class="msep">ต้นทุน</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div><label class="mlbl">ราคา/กก</label><input class="minp" id="m_pkg" type="number" inputmode="decimal" value="${it.pricePerKg||''}" placeholder="–" oninput="mAC()"></div>
-      <div><label class="mlbl">ปริมาณ (g)</label><input class="minp" id="m_qty" type="number" inputmode="decimal" value="${it.qty||''}" placeholder="70" oninput="mAC()"></div>
-    </div>
-    <div class="mac" id="m_ac">${it.pricePerKg&&it.qty?`= ${it.pricePerKg}/1000×${it.qty} = ${fmt((it.pricePerKg/1000)*it.qty)}`:''}</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-      <div><label class="mlbl">ต้นทุน/ชุด <span id="m_cn" style="color:var(--text3);font-size:10px">${it.pricePerKg&&it.qty?'(อัตโนมัติ)':''}</span></label>
-        <input class="minp" id="m_co" type="number" inputmode="decimal" value="${fmt(cost)}" oninput="_mManual=true;document.getElementById('m_cn').textContent='(กรอกเอง)';mPv()"></div>
-      <div><label class="mlbl">ราคาขาย</label><input class="minp" id="m_pr" type="number" inputmode="decimal" value="${fmt(it.price)}" oninput="mPv()"></div>
-    </div>
-    <div class="mpv" id="m_pv"></div>
+    <select class="minp" id="m_ct" style="color:var(--text)" onchange="onModalCatChange(this.value)">${opts}</select>
+    <div id="m_cost_section">${it.cat==='แพ็คเกจ'?pkgCostHTML(it):normalCostHTML(it)}</div>
     <div class="mrow">
       <button class="mcancel" onclick="closeModal()">ยกเลิก</button>
       <button class="mok" onclick="saveEdit('${id}')">บันทึก</button>
     </div>
     <button class="mdelbtn" onclick="confirmDel('${id}')">🗑 ลบรายการนี้</button>`);
-  mAC();mPv();
+  if(it.cat==='แพ็คเกจ') mACPkg(); else {mAC();mPv();}
 }
 function mAC(){
   const pkg=parseFloat(document.getElementById('m_pkg')?.value)||0;
@@ -574,6 +560,54 @@ function mPv(){
   if(el&&(pr||co)) el.innerHTML=`กำไร: <b style="color:${pos?'var(--green)':'var(--red)'}">${pos?'+':''}${fmt(prf)}</b>&nbsp; Margin: <b style="color:${pos?'var(--green)':'var(--red)'}">${mg}%</b>`;
   else if(el) el.textContent='กรอกราคาเพื่อดูกำไร';
 }
+function pkgCostHTML(it){
+  const pp=it?.packPrice||'',pq=it?.packQty||'';
+  const cost=it?fmt(getItemCost(it)):'',pr=it?fmt(it.price):'';
+  const hasAuto=it?.packPrice&&it?.packQty;
+  return`<div class="msep">ต้นทุน (แพ็คเกจ)</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div><label class="mlbl">ราคา/แพ็ค (฿)</label><input class="minp" id="m_pp" type="number" inputmode="decimal" value="${pp}" placeholder="0" oninput="mACPkg()"></div>
+      <div><label class="mlbl">จำนวน/แพ็ค (ชิ้น)</label><input class="minp" id="m_pq" type="number" inputmode="decimal" value="${pq}" placeholder="100" oninput="mACPkg()"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px">
+      <div><label class="mlbl">ต้นทุน/ชิ้น <span id="m_cn" style="color:var(--text3);font-size:10px">${hasAuto?'(อัตโนมัติ)':''}</span></label>
+        <input class="minp" id="m_co" type="number" inputmode="decimal" value="${cost}" placeholder="0" oninput="_mManual=true;document.getElementById('m_cn').textContent='(กรอกเอง)';mPv()"></div>
+      <div><label class="mlbl">ราคาขาย</label><input class="minp" id="m_pr" type="number" inputmode="decimal" value="${pr}" placeholder="0" oninput="mPv()"></div>
+    </div>
+    <div class="mpv" id="m_pv">กรอกราคาเพื่อดูกำไร</div>`;
+}
+function normalCostHTML(it){
+  const pkg=it?.pricePerKg||'',qty=it?.qty||'';
+  const cost=it?fmt(getItemCost(it)):'',pr=it?fmt(it.price):'';
+  const hasAuto=it?.pricePerKg&&it?.qty;
+  return`<div class="msep">ต้นทุน</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div><label class="mlbl">ราคา/กก</label><input class="minp" id="m_pkg" type="number" inputmode="decimal" value="${pkg}" placeholder="–" oninput="mAC()"></div>
+      <div><label class="mlbl">ปริมาณ (g)</label><input class="minp" id="m_qty" type="number" inputmode="decimal" value="${qty}" placeholder="70" oninput="mAC()"></div>
+    </div>
+    <div class="mac" id="m_ac">${hasAuto?`= ${it.pricePerKg}/1000×${it.qty} = ${fmt((it.pricePerKg/1000)*it.qty)}`:''}</div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+      <div><label class="mlbl">ต้นทุน/ชุด <span id="m_cn" style="color:var(--text3);font-size:10px">${hasAuto?'(อัตโนมัติ)':''}</span></label>
+        <input class="minp" id="m_co" type="number" inputmode="decimal" value="${cost}" placeholder="0" oninput="_mManual=true;document.getElementById('m_cn').textContent='(กรอกเอง)';mPv()"></div>
+      <div><label class="mlbl">ราคาขาย</label><input class="minp" id="m_pr" type="number" inputmode="decimal" value="${pr}" placeholder="0" oninput="mPv()"></div>
+    </div>
+    <div class="mpv" id="m_pv">กรอกราคาเพื่อดูกำไร</div>`;
+}
+function mACPkg(){
+  const pp=parseFloat(document.getElementById('m_pp')?.value)||0;
+  const pq=parseFloat(document.getElementById('m_pq')?.value)||0;
+  if(pp&&pq&&!_mManual){
+    const ci=document.getElementById('m_co'),cn=document.getElementById('m_cn');
+    if(ci)ci.value=fmt(pp/pq);
+    if(cn)cn.textContent='(อัตโนมัติ)';
+  }
+  mPv();
+}
+function onModalCatChange(cat){
+  _mManual=false;
+  const el=document.getElementById('m_cost_section');
+  if(el) el.innerHTML=cat==='แพ็คเกจ'?pkgCostHTML():normalCostHTML();
+}
 function confAdd(){
   const nm=document.getElementById('m_nm')?.value.trim();
   if(!nm){showToast('กรอกชื่อก่อน',true);return;}
@@ -581,9 +615,15 @@ function confAdd(){
   const cat=document.getElementById('m_ct')?.value;
   const price=parseFloat(document.getElementById('m_pr')?.value)||0;
   const cost=parseFloat(document.getElementById('m_co')?.value)||0;
-  const pricePerKg=parseFloat(document.getElementById('m_pkg')?.value)||0;
-  const qty=parseFloat(document.getElementById('m_qty')?.value)||0;
-  DB.alc.push({id:'it'+Date.now(),emoji:em,name:nm,cat,price,cost,pricePerKg,qty});
+  const item={id:'it'+Date.now(),emoji:em,name:nm,cat,price,cost};
+  if(cat==='แพ็คเกจ'){
+    item.packPrice=parseFloat(document.getElementById('m_pp')?.value)||0;
+    item.packQty=parseFloat(document.getElementById('m_pq')?.value)||0;
+  } else {
+    item.pricePerKg=parseFloat(document.getElementById('m_pkg')?.value)||0;
+    item.qty=parseFloat(document.getElementById('m_qty')?.value)||0;
+  }
+  DB.alc.push(item);
   saveDB();closeModal();renderMenu();
 }
 function saveEdit(id){
@@ -591,10 +631,15 @@ function saveEdit(id){
   it.emoji=document.getElementById('m_em').value.trim()||it.emoji;
   it.name=document.getElementById('m_nm').value.trim()||it.name;
   it.cat=document.getElementById('m_ct').value;
-  it.price=parseFloat(document.getElementById('m_pr').value)||0;
-  it.cost=parseFloat(document.getElementById('m_co').value)||0;
-  it.pricePerKg=parseFloat(document.getElementById('m_pkg').value)||0;
-  it.qty=parseFloat(document.getElementById('m_qty').value)||0;
+  it.price=parseFloat(document.getElementById('m_pr')?.value)||0;
+  it.cost=parseFloat(document.getElementById('m_co')?.value)||0;
+  if(it.cat==='แพ็คเกจ'){
+    it.packPrice=parseFloat(document.getElementById('m_pp')?.value)||0;
+    it.packQty=parseFloat(document.getElementById('m_pq')?.value)||0;
+  } else {
+    it.pricePerKg=parseFloat(document.getElementById('m_pkg')?.value)||0;
+    it.qty=parseFloat(document.getElementById('m_qty')?.value)||0;
+  }
   saveDB();closeModal();renderMenu();
 }
 function confirmDel(id){
