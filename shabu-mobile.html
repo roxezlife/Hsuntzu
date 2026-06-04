@@ -232,7 +232,10 @@ input,select,textarea{font-family:'Sarabun',sans-serif;outline:none;-webkit-appe
     <div class="calc-footer">
       <div class="cf-row">
         <span class="cf-lbl">ต้นทุนรวม</span>
-        <span class="cf-val" style="color:var(--red)" id="cfCost">0.00</span>
+        <span style="display:flex;gap:10px;align-items:baseline">
+          <span class="cf-val" style="color:var(--red)" id="cfCost">0.00</span>
+          <span class="cf-val" style="color:var(--green);font-size:12px" id="cfAlc" title="ราคาอลาคาร์ต"></span>
+        </span>
       </div>
       <div class="cf-price-row">
         <span class="cf-price-lbl">💰 ราคาขายชุด</span>
@@ -723,6 +726,9 @@ function renderCalcResult(){
     return s+(it?getItemCost(it)*setQty[id]:0);
   },0);
   document.getElementById('cfCost').textContent=`${fmt(totalCost)}`;
+  const totalAlc=keys.reduce((s,id)=>{const it=DB.alc.find(x=>x.id===id);return s+(it?(it.price||0)*setQty[id]:0);},0);
+  const alcEl=document.getElementById('cfAlc');
+  if(alcEl) alcEl.textContent=totalAlc>0?`/ ${fmt(totalAlc)}`:``;
   const sell=parseFloat(document.getElementById('cfPrice')?.value)||0;
   const prfRow=document.getElementById('cfPrfRow');
   if(sell){
