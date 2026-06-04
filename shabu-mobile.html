@@ -1155,7 +1155,6 @@ FDOC.onSnapshot(snap=>{
   if(curTab==='menu') renderMenu();
   else if(curTab==='calc'){renderCalcChips();renderCalcItems();}
   else if(curTab==='recipe') renderRecipeList();
-  showToast('ซิ้งค์แล้ว ☁️');
   setSyncIcon(true);
 },e=>{setSyncIcon(false);showToast('ซิ้งค์ไม่ได้: '+e.code||e.message||'error',true);console.warn('Firestore error:',e);});
 </script>
