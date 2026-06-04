@@ -200,7 +200,7 @@ input,select,textarea{font-family:'Sarabun',sans-serif;outline:none;-webkit-appe
 
 <div class="topbar">
   <div class="brand">🍲 <span id="shopLbl">Hsuntzu Cost Cal</span></div>
-  <div class="clock" id="clockEl"></div>
+  <div style="display:flex;align-items:center;gap:6px"><span id="syncIcon" title="ซิ้งค์แล้ว" style="font-size:14px;cursor:default">☁️</span><div class="clock" id="clockEl"></div></div>
 </div>
 
 <div class="content">
@@ -395,12 +395,21 @@ firebase.initializeApp({
 });
 const fsdb=firebase.firestore();
 const FDOC=fsdb.collection('shabu').doc('main');
+const _devId=Math.random().toString(36).slice(2)+Date.now(); // sessionStorage ทำให้แต่ละแท็บมี ID ใหม่เสมอ
+let _syncStatus='ok'; // 'ok' | 'error'
+function setSyncIcon(ok){
+  _syncStatus=ok?'ok':'error';
+  const el=document.getElementById('syncIcon');
+  if(el){el.textContent=ok?'☁️':'⚠️';el.title=ok?'ซิ้งค์แล้ว':'ไม่สามารถซิ้งค์ได้';}
+}
 
 function loadDB(){try{const r=localStorage.getItem(SK);if(r)return JSON.parse(r);}catch(e){}return null;}
 function saveLocal(){try{localStorage.setItem(SK,JSON.stringify(DB));}catch(e){}}
 function saveDB(){
   saveLocal();
-  FDOC.set(JSON.parse(JSON.stringify(DB))).catch(e=>console.warn('Firestore:',e));
+  const payload=JSON.parse(JSON.stringify(DB));
+  payload._wid=_devId;
+  FDOC.set(payload).then(()=>setSyncIcon(true)).catch(e=>{setSyncIcon(false);showToast('ซิ้งค์ไม่ได้: '+e.code||e.message||'error',true);console.warn('Firestore:',e);});
 }
 let DB=loadDB()||{shop:{name:'Hsuntzu Cost Cal'},alc:JSON.parse(JSON.stringify(DEFAULT_ALC)),cart:[],orders:[],customCats:[],deletedDefaultCats:[]};
 if(!DB.alc||!DB.alc.length) DB.alc=JSON.parse(JSON.stringify(DEFAULT_ALC));
@@ -1129,15 +1138,20 @@ FDOC.onSnapshot(snap=>{
     _firstLoad=false; return;
   }
   _firstLoad=false;
-  if(snap.metadata.hasPendingWrites) return; // เป็น write ของเราเอง ข้ามไป
-  DB=snap.data();
+  if(snap.metadata.hasPendingWrites) return;
+  const d=snap.data();
+  if(d._wid===_devId) return; // snapshot ของเราเองที่ server confirm แล้ว ข้ามไป
+  DB=d;
+  delete DB._wid;
   saveLocal();
   (DB.customCats||[]).forEach(n=>{if(!CAT_EMOJI[n])CAT_EMOJI[n]='🍽';});
   computeCosts();
   if(curTab==='menu') renderMenu();
   else if(curTab==='calc'){renderCalcChips();renderCalcItems();}
   else if(curTab==='recipe') renderRecipeList();
-},e=>console.warn('Firestore error:',e));
+  showToast('ซิ้งค์แล้ว ☁️');
+  setSyncIcon(true);
+},e=>{setSyncIcon(false);showToast('ซิ้งค์ไม่ได้: '+e.code||e.message||'error',true);console.warn('Firestore error:',e);});
 </script>
 </body>
 </html>
